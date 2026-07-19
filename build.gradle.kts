@@ -26,8 +26,9 @@ dependencies {
     implementation("info.picocli:picocli:4.7.6")
     annotationProcessor("info.picocli:picocli-codegen:4.7.6")
 
-    // Terminal UI
-    implementation("com.googlecode.lanterna:lanterna:3.0.3")
+    // Terminal UI (JLine 3 Interactive Shell)
+    implementation("org.jline:jline:3.26.2")
+    implementation("org.jline:jline-terminal-jna:3.26.2")
     implementation("net.java.dev.jna:jna:5.14.0")
     implementation("net.java.dev.jna:jna-platform:5.14.0")
     compileOnly("org.graalvm.nativeimage:svm:23.1.2") // For GraalVM substitutions

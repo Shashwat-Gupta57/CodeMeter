@@ -1,13 +1,13 @@
 package dev.codemeter.cli;
 
 import dev.codemeter.CodeMeter;
-import dev.codemeter.tui.TuiApp;
+import dev.codemeter.shell.ShellApp;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
 /**
  * Main CLI command for CodeMeter.
- * When invoked without subcommands, launches the interactive TUI.
+ * When invoked without subcommands, launches the interactive Shell.
  */
 @Command(
         name = "codemeter",
@@ -16,15 +16,16 @@ import picocli.CommandLine.Command;
         mixinStandardHelpOptions = true,
         subcommands = {
                 ScanCommand.class,
-                ExportCommand.class
+                ExportCommand.class,
+                WrappedCommand.class
         }
 )
 public class CodeMeterCommand implements Runnable {
 
     @Override
     public void run() {
-        // Default action: launch the TUI
-        TuiApp app = new TuiApp();
+        // Default action: launch the Shell
+        ShellApp app = new ShellApp();
         app.run();
     }
 }
