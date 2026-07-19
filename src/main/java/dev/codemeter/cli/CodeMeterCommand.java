@@ -18,7 +18,13 @@ import picocli.CommandLine.Command;
                 ScanCommand.class,
                 ConfigCommand.class,
                 ExportCommand.class,
-                WrappedCommand.class
+                WrappedCommand.class,
+                CompareCommand.class,
+                HistoryCommand.class,
+                DoctorCommand.class,
+                MilestonesCommand.class,
+                StatsCommand.class,
+                BenchmarkCommand.class
         }
 )
 public class CodeMeterCommand implements Runnable {
@@ -27,6 +33,6 @@ public class CodeMeterCommand implements Runnable {
 
     @Override
     public void run() {
-        spec.commandLine().usage(System.out);
+        dev.codemeter.CodeMeter.printCustomHelp();
     }
 }

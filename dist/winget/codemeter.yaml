@@ -1,0 +1,13 @@
+PackageIdentifier: codemeter.codemeter
+PackageVersion: 1.0.0
+PackageName: CodeMeter
+Publisher: codemeter
+License: MIT
+ShortDescription: Measure your code. Physically.
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v1.0.0/codemeter-windows-amd64.exe
+    InstallerSha256: 0000000000000000000000000000000000000000000000000000000000000000
+    InstallerType: portable
+ManifestType: singleton
+ManifestVersion: 1.4.0
