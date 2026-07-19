@@ -288,45 +288,4 @@ jobs:
           git commit -m "Update CodeMeter to v${{ env.VERSION }}"
           git push
 
-  update-nix-flake:
-    needs: release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Download Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          merge-multiple: true
 
-      - name: Calculate Hashes
-        id: hashes
-        run: |
-          echo "MAC_INTEL=sha256-$(openssl dgst -sha256 -binary artifacts/codemeter-macos-amd64 | openssl base64 -A)" >> $GITHUB_ENV
-          echo "MAC_ARM=sha256-$(openssl dgst -sha256 -binary artifacts/codemeter-macos-arm64 | openssl base64 -A)" >> $GITHUB_ENV
-          echo "LINUX_INTEL=sha256-$(openssl dgst -sha256 -binary artifacts/codemeter-linux-amd64 | openssl base64 -A)" >> $GITHUB_ENV
-          echo "LINUX_ARM=sha256-$(openssl dgst -sha256 -binary artifacts/codemeter-linux-arm64 | openssl base64 -A)" >> $GITHUB_ENV
-          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
-
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          token: ${{ secrets.PAT_TOKEN }}
-
-      - name: Update flake.nix
-        run: |
-          sed -i "s/version = \".*\"/version = \"${{ env.VERSION }}\"/" flake.nix
-          sed -i "s|x86_64-linux = \".*\"|x86_64-linux = \"${{ env.LINUX_INTEL }}\"|" flake.nix
-          sed -i "s|aarch64-linux = \".*\"|aarch64-linux = \"${{ env.LINUX_ARM }}\"|" flake.nix
-          sed -i "s|x86_64-darwin = \".*\"|x86_64-darwin = \"${{ env.MAC_INTEL }}\"|" flake.nix
-          sed -i "s|aarch64-darwin = \".*\"|aarch64-darwin = \"${{ env.MAC_ARM }}\"|" flake.nix
-
-      - name: Push to Repo
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add flake.nix
-          git commit -m "chore: Update Nix flake hashes for v${{ env.VERSION }}"
-          git push
