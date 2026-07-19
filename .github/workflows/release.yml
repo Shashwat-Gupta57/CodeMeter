@@ -1,0 +1,99 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-native:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'
+          distribution: 'graalvm'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build Native Image
+        run: ./gradlew nativeCompile
+
+      - name: Upload Native Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: codemeter-native-${{ matrix.os }}
+          path: |
+            build/native/nativeCompile/codemeter
+            build/native/nativeCompile/codemeter.exe
+
+  build-jar:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build Shadow JAR
+        run: ./gradlew shadowJar
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: codemeter-jar
+          path: build/libs/codemeter.jar
+
+  release:
+    needs: [build-native, build-jar]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare Release Assets
+        run: |
+          mkdir -p release-assets
+          cp artifacts/codemeter-jar/codemeter.jar release-assets/
+          
+          if [ -f artifacts/codemeter-native-ubuntu-latest/codemeter ]; then
+            cp artifacts/codemeter-native-ubuntu-latest/codemeter release-assets/codemeter-linux-amd64
+          fi
+          
+          if [ -f artifacts/codemeter-native-macos-latest/codemeter ]; then
+            cp artifacts/codemeter-native-macos-latest/codemeter release-assets/codemeter-macos-amd64
+          fi
+          
+          if [ -f artifacts/codemeter-native-windows-latest/codemeter.exe ]; then
+            cp artifacts/codemeter-native-windows-latest/codemeter.exe release-assets/codemeter-windows-amd64.exe
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          generate_release_notes: true
