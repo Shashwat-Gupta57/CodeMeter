@@ -27,7 +27,7 @@ dependencies {
     annotationProcessor("info.picocli:picocli-codegen:4.7.6")
 
     // Terminal UI
-    implementation("com.googlecode.lanterna:lanterna:3.1.2")
+    implementation("com.googlecode.lanterna:lanterna:3.0.3")
     implementation("net.java.dev.jna:jna:5.14.0")
     implementation("net.java.dev.jna:jna-platform:5.14.0")
 
@@ -83,6 +83,7 @@ graalvmNative {
         named("main") {
             imageName.set("codemeter")
             fallback.set(false)
+            buildArgs.add("-H:IncludeResources=com/sun/jna/win32-x86-64/jnidispatch\\.dll")
         }
     }
     metadataRepository {

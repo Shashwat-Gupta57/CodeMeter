@@ -111,7 +111,18 @@ public class TuiApp {
         factory.setTerminalEmulatorTitle("CodeMeter — Measure your code. Physically.");
         factory.setPreferTerminalEmulator(false);
         factory.setForceTextTerminal(true);
-        terminal = factory.createTerminal();
+        
+        try {
+            terminal = factory.createTerminal();
+        } catch (IOException e) {
+            if (System.getProperty("os.name", "").toLowerCase().startsWith("windows")) {
+                // Fallback for GraalVM Native Image on Windows / Missing Lanterna WindowsTerminal
+                terminal = new WindowsNativeTerminal(System.in, System.out, java.nio.charset.Charset.defaultCharset());
+            } else {
+                throw e;
+            }
+        }
+        
         screen = new TerminalScreen(terminal);
         screen.startScreen();
         screen.setCursorPosition(null); // Hide cursor
