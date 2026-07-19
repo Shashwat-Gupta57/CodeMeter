@@ -59,20 +59,20 @@ public class DynamicComparisons {
         List<String> comps = new ArrayList<>();
         
         if (pm.earthCircumferencePercent() >= 0.5) {
-            comps.add(String.format("- %.1f%% of Earth's circumference", pm.earthCircumferencePercent()));
-            comps.add(String.format("- %.1f Marathons", pm.marathons()));
+            comps.add(String.format("✓ %.1f%% of Earth's circumference", pm.earthCircumferencePercent()));
+            comps.add(String.format("✓ %.1f Marathons", pm.marathons()));
         } else if (pm.marathons() >= 1.0) {
-            comps.add(String.format("- %.1f Marathons", pm.marathons()));
-            comps.add(String.format("- %.0f football fields", pm.footballFields()));
+            comps.add(String.format("✓ %.1f Marathons", pm.marathons()));
+            comps.add(String.format("✓ %.0f football fields", pm.footballFields()));
         } else if (pm.footballFields() >= 1.0) {
-            comps.add(String.format("- %.0f football fields", pm.footballFields()));
-            comps.add(String.format("- Around Central Park %.1f times", pm.centralParkLoops()));
+            comps.add(String.format("✓ %.0f football fields", pm.footballFields()));
+            comps.add(String.format("✓ Around Central Park %.1f times", pm.centralParkLoops()));
         } else if (pm.olympicSwimmingPools() >= 1.0) {
-            comps.add(String.format("- %.1f Olympic swimming pools", pm.olympicSwimmingPools()));
-            comps.add(String.format("- %.1f Basketball courts", pm.basketballCourts()));
+            comps.add(String.format("✓ %.1f Olympic swimming pools", pm.olympicSwimmingPools()));
+            comps.add(String.format("✓ %.1f Basketball courts", pm.basketballCourts()));
         } else {
-            comps.add(String.format("- %.1f Basketball courts", pm.basketballCourts()));
-            comps.add(String.format("- %.1f Tennis courts", pm.tennisCourts()));
+            comps.add(String.format("✓ %.1f Basketball courts", pm.basketballCourts()));
+            comps.add(String.format("✓ %.1f Tennis courts", pm.tennisCourts()));
         }
         
         return comps;

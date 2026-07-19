@@ -16,6 +16,13 @@ public final class CodeMeter {
     public static final String TAGLINE = "Measure your code. Physically.";
 
     public static void main(String[] args) {
+        // Force UTF-8 output to prevent Windows console encoding issues (e.g. replacing '━' with '?')
+        try {
+            System.setOut(new java.io.PrintStream(System.out, true, "UTF-8"));
+            System.setErr(new java.io.PrintStream(System.err, true, "UTF-8"));
+        } catch (java.io.UnsupportedEncodingException e) {
+            // Should never happen, UTF-8 is guaranteed by JVM
+        }
         // Force headless mode to prevent AWT from trying to load native UI libraries
         // This is crucial for GraalVM Native Image on Windows to avoid UnsatisfiedLinkError
         System.setProperty("java.awt.headless", "true");
