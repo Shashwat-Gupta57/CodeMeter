@@ -12,20 +12,10 @@ import picocli.CommandLine;
 public final class CodeMeter {
 
     public static final String NAME = "CodeMeter";
-    public static final String VERSION = "2.5.1";
+    public static final String VERSION = "2.5.2";
     public static final String TAGLINE = "Measure your code. Physically.";
 
     public static void main(String[] args) {
-        // Force UTF-8 output to prevent Windows console encoding issues (e.g. replacing '━' with '?')
-        try {
-            System.setOut(new java.io.PrintStream(System.out, true, "UTF-8"));
-            System.setErr(new java.io.PrintStream(System.err, true, "UTF-8"));
-        } catch (java.io.UnsupportedEncodingException e) {
-            // Should never happen, UTF-8 is guaranteed by JVM
-        }
-        
-        // Force Windows Console to actually decode the UTF-8 bytes we send it
-        dev.codemeter.cli.WindowsConsoleSetup.enableUTF8();
         // Force headless mode to prevent AWT from trying to load native UI libraries
         // This is crucial for GraalVM Native Image on Windows to avoid UnsatisfiedLinkError
         System.setProperty("java.awt.headless", "true");

@@ -21,7 +21,7 @@ jobs:
             target: codemeter-macos-arm64
           - os: windows-latest
             arch: amd64
-            target: codemeter-windows-amd64.exe
+            target: codemeter-windows-amd64
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -44,16 +44,27 @@ jobs:
         if: runner.os != 'Windows'
         run: mv build/native/nativeCompile/codemeter build/native/nativeCompile/${{ matrix.target }}
 
-      - name: Rename Binary (Windows)
+      - name: Package Windows Release
         if: runner.os == 'Windows'
-        run: move build\native\nativeCompile\codemeter.exe build\native\nativeCompile\${{ matrix.target }}
+        run: |
+          cd build\native\nativeCompile
+          copy C:\Windows\System32\vcruntime140.dll .
+          7z a codemeter-windows-amd64.zip codemeter.exe vcruntime140.dll
         shell: cmd
 
-      - name: Upload Native Binary
+      - name: Upload Native Binary (Unix)
+        if: runner.os != 'Windows'
         uses: actions/upload-artifact@v4
         with:
           name: native-${{ matrix.target }}
           path: build/native/nativeCompile/${{ matrix.target }}
+
+      - name: Upload Native Binary (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-${{ matrix.target }}.zip
+          path: build/native/nativeCompile/${{ matrix.target }}.zip
 
   build-jar:
     runs-on: ubuntu-latest
@@ -116,7 +127,7 @@ jobs:
           cp artifacts/codemeter-linux-arm64 release-assets/ || true
           cp artifacts/codemeter-macos-amd64 release-assets/ || true
           cp artifacts/codemeter-macos-arm64 release-assets/ || true
-          cp artifacts/codemeter-windows-amd64.exe release-assets/ || true
+          cp artifacts/codemeter-windows-amd64.zip release-assets/ || true
           cp artifacts/codemeter-sbom.json release-assets/ || true
 
           cd release-assets
@@ -146,12 +157,12 @@ jobs:
       - name: Download Windows Binary
         uses: actions/download-artifact@v4
         with:
-          name: native-codemeter-windows-amd64.exe
+          name: native-codemeter-windows-amd64.zip
           path: artifacts
 
       - name: Calculate Hash and Version
         run: |
-          echo "WIN_HASH=$(sha256sum artifacts/codemeter-windows-amd64.exe | awk '{print $1}')" >> $GITHUB_ENV
+          echo "WIN_HASH=$(sha256sum artifacts/codemeter-windows-amd64.zip | awk '{print $1}')" >> $GITHUB_ENV
           echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
       - name: Checkout Scoop Bucket
@@ -174,7 +185,7 @@ jobs:
               license: "MIT",
               architecture: {
                 "64bit": {
-                  url: ("https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v" + $version + "/codemeter-windows-amd64.exe#/codemeter.exe"),
+                  url: ("https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v" + $version + "/codemeter-windows-amd64.zip"),
                   hash: $hash
                 }
               },
@@ -185,7 +196,7 @@ jobs:
               autoupdate: {
                 architecture: {
                   "64bit": {
-                    url: "https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v$version/codemeter-windows-amd64.exe#/codemeter.exe"
+                    url: "https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v$version/codemeter-windows-amd64.zip"
                   }
                 }
               }

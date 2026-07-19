@@ -13,7 +13,7 @@
 
         codemeter = pkgs.stdenv.mkDerivation {
           pname = "codemeter";
-          version = "2.5.1";
+          version = "2.5.2";
 
           src = self;
 
