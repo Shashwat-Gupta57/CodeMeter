@@ -107,7 +107,9 @@ public class SccScanner implements CodeScanner {
         try {
             JsonArray languages = GSON.fromJson(json.trim(), JsonArray.class);
             if (languages == null || languages.isEmpty()) {
-                throw new ScanException("scc returned empty results");
+                String projectName = directory.getFileName() != null ? directory.getFileName().toString() : directory.toString();
+                return new ScanResult(directory.toAbsolutePath().toString(), projectName, System.currentTimeMillis(),
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, "", 0, 0.0, 0.0, new ArrayList<>(), new HashMap<>());
             }
 
             List<LanguageStats> langStats = new ArrayList<>();
@@ -183,6 +185,10 @@ public class SccScanner implements CodeScanner {
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
                     String dirName = dir.getFileName() != null ? dir.getFileName().toString() : "";
+                    if (dir.equals(directory)) {
+                        dirCount[0]++;
+                        return FileVisitResult.CONTINUE;
+                    }
                     if (dirName.startsWith(".") || dirName.equals("node_modules")
                             || dirName.equals("vendor") || dirName.equals("target")
                             || dirName.equals("build") || dirName.equals("dist")) {
@@ -257,7 +263,8 @@ public class SccScanner implements CodeScanner {
                     result.averageFileSize(),
                     avgLineLen,
                     result.languages(),
-                    byExtension
+                    byExtension,
+                    GitHelper.getGitStats(directory)
             );
         } catch (IOException e) {
             return result; // Return unaugmented result if walk fails

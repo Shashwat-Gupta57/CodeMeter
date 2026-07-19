@@ -25,7 +25,8 @@ public record ScanResult(
         double averageFileSize,
         double averageLineLength,
         List<LanguageStats> languages,
-        Map<String, Long> filesByExtension
+        Map<String, Long> filesByExtension,
+        GitStats gitStats
 ) {
     /**
      * Total LOC = code + comments + blanks.
@@ -49,5 +50,17 @@ public record ScanResult(
      */
     public int languageCount() {
         return languages.size();
+    }
+
+    public ScanResult(
+            String projectPath, String projectName, long timestamp, long totalFiles, long totalDirectories,
+            long totalCodeLines, long totalCommentLines, long totalBlankLines, long totalLines,
+            long totalCharacters, long totalWords, long totalBytes, String largestFile, long largestFileLines,
+            double averageFileSize, double averageLineLength, List<LanguageStats> languages,
+            Map<String, Long> filesByExtension
+    ) {
+        this(projectPath, projectName, timestamp, totalFiles, totalDirectories, totalCodeLines,
+                totalCommentLines, totalBlankLines, totalLines, totalCharacters, totalWords, totalBytes,
+                largestFile, largestFileLines, averageFileSize, averageLineLength, languages, filesByExtension, null);
     }
 }

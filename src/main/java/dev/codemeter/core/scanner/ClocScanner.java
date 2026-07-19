@@ -138,7 +138,9 @@ public class ClocScanner implements CodeScanner {
         }
 
         if (langStats.isEmpty()) {
-            throw new ScanException("cloc returned no language data. Output: " + csvOutput);
+            String projectName = directory.getFileName() != null ? directory.getFileName().toString() : directory.toString();
+            return new ScanResult(directory.toAbsolutePath().toString(), projectName, System.currentTimeMillis(),
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, "", 0, 0.0, 0.0, new ArrayList<>(), new HashMap<>());
         }
 
         long totalLines = totalCode + totalComments + totalBlanks;

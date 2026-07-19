@@ -83,22 +83,82 @@ public class StorageManager {
             Path file = StoragePaths.configFile();
             StringBuilder toml = new StringBuilder();
             toml.append("# CodeMeter Configuration\n\n");
-            toml.append("[theme]\n");
-            toml.append("mode = \"").append(settings.getTheme().name().toLowerCase()).append("\"\n");
-            toml.append("animations = ").append(settings.isAnimationsEnabled()).append("\n\n");
-            toml.append("[measurement]\n");
-            toml.append("system = \"").append(settings.getMeasurement().name().toLowerCase()).append("\"\n\n");
-            toml.append("[print]\n");
-            toml.append("paper_size = \"").append(settings.getPaperSize().name()).append("\"\n");
-            toml.append("margin_type = \"").append(settings.getMarginType().name().toLowerCase()).append("\"\n");
-            toml.append("font = \"").append(settings.getFontName()).append("\"\n");
-            toml.append("font_size = ").append(settings.getFontSize()).append("\n");
+            
+            toml.append("[typography]\n");
+            toml.append("font_name = \"").append(settings.getFontName()).append("\"\n");
+            toml.append("font_size_pt = ").append(settings.getFontSizePt()).append("\n");
+            toml.append("character_width_mm = ").append(settings.getCharacterWidthMm()).append("\n");
+            toml.append("character_height_mm = ").append(settings.getCharacterHeightMm()).append("\n");
             toml.append("line_spacing = ").append(settings.getLineSpacing()).append("\n");
-            toml.append("ink_type = \"").append(settings.getInkType().name().toLowerCase()).append("\"\n");
-            toml.append("paper_thickness_mm = ").append(settings.getPaperThicknessMm()).append("\n\n");
-            toml.append("[features]\n");
-            toml.append("comparison_objects = ").append(settings.isComparisonObjectsEnabled()).append("\n");
-            toml.append("history = ").append(settings.isHistoryEnabled()).append("\n");
+            toml.append("tab_width_spaces = ").append(settings.getTabWidthSpaces()).append("\n");
+            toml.append("characters_per_tab = ").append(settings.getCharactersPerTab()).append("\n\n");
+
+            toml.append("[paper]\n");
+            toml.append("paper_size = \"").append(settings.getPaperSize().name()).append("\"\n");
+            toml.append("page_width_mm = ").append(settings.getPageWidthMm()).append("\n");
+            toml.append("page_height_mm = ").append(settings.getPageHeightMm()).append("\n");
+            toml.append("margin_top_mm = ").append(settings.getMarginTopMm()).append("\n");
+            toml.append("margin_bottom_mm = ").append(settings.getMarginBottomMm()).append("\n");
+            toml.append("margin_left_mm = ").append(settings.getMarginLeftMm()).append("\n");
+            toml.append("margin_right_mm = ").append(settings.getMarginRightMm()).append("\n");
+            toml.append("paper_weight_gsm = ").append(settings.getPaperWeightGsm()).append("\n");
+            toml.append("paper_thickness_mm = ").append(settings.getPaperThicknessMm()).append("\n");
+            toml.append("double_sided_printing = ").append(settings.isDoubleSidedPrinting()).append("\n");
+            toml.append("binding_margin_mm = ").append(settings.getBindingMarginMm()).append("\n\n");
+
+            toml.append("[printing]\n");
+            toml.append("printer_dpi = ").append(settings.getPrinterDpi()).append("\n");
+            toml.append("ink_coverage_percent = ").append(settings.getInkCoveragePercent()).append("\n");
+            toml.append("printing_cost_per_page = ").append(settings.getPrintingCostPerPage()).append("\n");
+            toml.append("binding_cost_per_book = ").append(settings.getBindingCostPerBook()).append("\n");
+            toml.append("pages_per_book = ").append(settings.getPagesPerBook()).append("\n");
+            toml.append("pages_per_printer_tray = ").append(settings.getPagesPerPrinterTray()).append("\n");
+            toml.append("pages_per_box = ").append(settings.getPagesPerBox()).append("\n");
+            toml.append("shelf_width_per_book_mm = ").append(settings.getShelfWidthPerBookMm()).append("\n");
+            toml.append("average_print_speed_ppm = ").append(settings.getAveragePrintSpeedPpm()).append("\n\n");
+
+            toml.append("[environment]\n");
+            toml.append("tree_pages_per_tree = ").append(settings.getTreePagesPerTree()).append("\n");
+            toml.append("co2_per_sheet_grams = ").append(settings.getCo2PerSheetGrams()).append("\n");
+            toml.append("paper_recycling_factor = ").append(settings.getPaperRecyclingFactor()).append("\n\n");
+
+            toml.append("[reading_writing]\n");
+            toml.append("reading_speed_wpm = ").append(settings.getReadingSpeedWpm()).append("\n");
+            toml.append("typing_speed_wpm = ").append(settings.getTypingSpeedWpm()).append("\n");
+            toml.append("working_hours_per_day = ").append(settings.getWorkingHoursPerDay()).append("\n");
+            toml.append("average_word_length = ").append(settings.getAverageWordLength()).append("\n");
+            toml.append("average_sentence_length = ").append(settings.getAverageSentenceLength()).append("\n\n");
+
+            toml.append("[distance]\n");
+            toml.append("character_spacing_mm = ").append(settings.getCharacterSpacingMm()).append("\n");
+            toml.append("space_character_width_mm = ").append(settings.getSpaceCharacterWidthMm()).append("\n");
+            toml.append("tab_render_width_mm = ").append(settings.getTabRenderWidthMm()).append("\n\n");
+
+            toml.append("[comparisons]\n");
+            toml.append("comparison_style = \"").append(settings.getComparisonStyle()).append("\"\n");
+            toml.append("comparison_units = \"").append(settings.getComparisonUnits()).append("\"\n");
+            toml.append("measurement_system = \"").append(settings.getMeasurementSystem().name()).append("\"\n");
+            toml.append("show_estimates = ").append(settings.isShowEstimates()).append("\n");
+            toml.append("show_confidence_levels = ").append(settings.isShowConfidenceLevels()).append("\n");
+            toml.append("show_fun_facts = ").append(settings.isShowFunFacts()).append("\n");
+            toml.append("show_achievements = ").append(settings.isShowAchievements()).append("\n");
+            toml.append("show_repository_comparisons = ").append(settings.isShowRepositoryComparisons()).append("\n");
+            toml.append("show_git_statistics = ").append(settings.isShowGitStatistics()).append("\n\n");
+
+            toml.append("[story]\n");
+            toml.append("theme = \"").append(settings.getTheme().name()).append("\"\n");
+            toml.append("story_density = \"").append(settings.getStoryDensity()).append("\"\n");
+            toml.append("verbosity = \"").append(settings.getVerbosity()).append("\"\n");
+            toml.append("whitespace_level = \"").append(settings.getWhitespaceLevel()).append("\"\n");
+            toml.append("maximum_comparisons_per_section = ").append(settings.getMaximumComparisonsPerSection()).append("\n");
+            toml.append("headline_strategy = \"").append(settings.getHeadlineStrategy().name()).append("\"\n\n");
+
+            toml.append("[backend]\n");
+            toml.append("scanner_backend = \"").append(settings.getScannerBackend().name()).append("\"\n");
+            toml.append("git_integration = ").append(settings.isGitIntegration()).append("\n");
+            toml.append("parallelism = ").append(settings.isParallelism()).append("\n");
+            toml.append("cache_enabled = ").append(settings.isCacheEnabled()).append("\n");
+            
             Files.writeString(file, toml.toString());
         } catch (IOException e) {
             System.err.println("Failed to save settings: " + e.getMessage());
@@ -108,8 +168,10 @@ public class StorageManager {
     private void loadSettings() {
         try {
             Path file = StoragePaths.configFile();
-            if (!Files.exists(file)) return;
-            // Simple TOML parsing for our known keys
+            if (!Files.exists(file)) {
+                saveSettings(); // Automatically generate it on first run
+                return;
+            }
             String content = Files.readString(file);
             for (String line : content.split("\n")) {
                 line = line.trim();
@@ -128,20 +190,82 @@ public class StorageManager {
     private void applySettingValue(String key, String value) {
         try {
             switch (key) {
-                case "mode" -> settings.setTheme(Settings.ThemeMode.valueOf(value.toUpperCase()));
-                case "animations" -> settings.setAnimationsEnabled(Boolean.parseBoolean(value));
-                case "system" -> settings.setMeasurement(Settings.MeasurementSystem.valueOf(value.toUpperCase()));
-                case "paper_size" -> settings.setPaperSize(Settings.PaperSize.valueOf(value.toUpperCase()));
-                case "margin_type" -> settings.setMarginType(Settings.MarginType.valueOf(value.toUpperCase()));
-                case "font" -> settings.setFontName(value);
-                case "font_size" -> settings.setFontSize(Integer.parseInt(value));
+                // Backend
+                case "scanner_backend" -> settings.setScannerBackend(Settings.ScannerBackend.valueOf(value.toUpperCase()));
+                case "git_integration" -> settings.setGitIntegration(Boolean.parseBoolean(value));
+                case "parallelism" -> settings.setParallelism(Boolean.parseBoolean(value));
+                case "cache_enabled" -> settings.setCacheEnabled(Boolean.parseBoolean(value));
+
+                // Typography
+                case "font_name" -> settings.setFontName(value);
+                case "font_size_pt" -> settings.setFontSizePt(Integer.parseInt(value));
+                case "character_width_mm" -> settings.setCharacterWidthMm(Double.parseDouble(value));
+                case "character_height_mm" -> settings.setCharacterHeightMm(Double.parseDouble(value));
                 case "line_spacing" -> settings.setLineSpacing(Double.parseDouble(value));
-                case "ink_type" -> settings.setInkType(Settings.InkType.valueOf(value.toUpperCase()));
+                case "tab_width_spaces" -> settings.setTabWidthSpaces(Integer.parseInt(value));
+                case "characters_per_tab" -> settings.setCharactersPerTab(Integer.parseInt(value));
+
+                // Paper
+                case "paper_size" -> settings.setPaperSize(Settings.PaperSize.valueOf(value.toUpperCase()));
+                case "page_width_mm" -> settings.setPageWidthMm(Double.parseDouble(value));
+                case "page_height_mm" -> settings.setPageHeightMm(Double.parseDouble(value));
+                case "margin_top_mm" -> settings.setMarginTopMm(Double.parseDouble(value));
+                case "margin_bottom_mm" -> settings.setMarginBottomMm(Double.parseDouble(value));
+                case "margin_left_mm" -> settings.setMarginLeftMm(Double.parseDouble(value));
+                case "margin_right_mm" -> settings.setMarginRightMm(Double.parseDouble(value));
+                case "paper_weight_gsm" -> settings.setPaperWeightGsm(Double.parseDouble(value));
                 case "paper_thickness_mm" -> settings.setPaperThicknessMm(Double.parseDouble(value));
-                case "comparison_objects" -> settings.setComparisonObjectsEnabled(Boolean.parseBoolean(value));
-                case "history" -> settings.setHistoryEnabled(Boolean.parseBoolean(value));
+                case "double_sided_printing" -> settings.setDoubleSidedPrinting(Boolean.parseBoolean(value));
+                case "binding_margin_mm" -> settings.setBindingMarginMm(Double.parseDouble(value));
+
+                // Printing
+                case "printer_dpi" -> settings.setPrinterDpi(Integer.parseInt(value));
+                case "ink_coverage_percent" -> settings.setInkCoveragePercent(Double.parseDouble(value));
+                case "printing_cost_per_page" -> settings.setPrintingCostPerPage(Double.parseDouble(value));
+                case "binding_cost_per_book" -> settings.setBindingCostPerBook(Double.parseDouble(value));
+                case "pages_per_book" -> settings.setPagesPerBook(Integer.parseInt(value));
+                case "pages_per_printer_tray" -> settings.setPagesPerPrinterTray(Integer.parseInt(value));
+                case "pages_per_box" -> settings.setPagesPerBox(Integer.parseInt(value));
+                case "shelf_width_per_book_mm" -> settings.setShelfWidthPerBookMm(Double.parseDouble(value));
+                case "average_print_speed_ppm" -> settings.setAveragePrintSpeedPpm(Double.parseDouble(value));
+
+                // Environment
+                case "tree_pages_per_tree" -> settings.setTreePagesPerTree(Double.parseDouble(value));
+                case "co2_per_sheet_grams" -> settings.setCo2PerSheetGrams(Double.parseDouble(value));
+                case "paper_recycling_factor" -> settings.setPaperRecyclingFactor(Double.parseDouble(value));
+
+                // Reading & Writing
+                case "reading_speed_wpm" -> settings.setReadingSpeedWpm(Double.parseDouble(value));
+                case "typing_speed_wpm" -> settings.setTypingSpeedWpm(Double.parseDouble(value));
+                case "working_hours_per_day" -> settings.setWorkingHoursPerDay(Double.parseDouble(value));
+                case "average_word_length" -> settings.setAverageWordLength(Double.parseDouble(value));
+                case "average_sentence_length" -> settings.setAverageSentenceLength(Double.parseDouble(value));
+
+                // Distance Calculations
+                case "character_spacing_mm" -> settings.setCharacterSpacingMm(Double.parseDouble(value));
+                case "space_character_width_mm" -> settings.setSpaceCharacterWidthMm(Double.parseDouble(value));
+                case "tab_render_width_mm" -> settings.setTabRenderWidthMm(Double.parseDouble(value));
+
+                // Comparisons
+                case "comparison_style" -> settings.setComparisonStyle(value);
+                case "comparison_units" -> settings.setComparisonUnits(value);
+                case "measurement_system" -> settings.setMeasurementSystem(Settings.MeasurementSystem.valueOf(value.toUpperCase()));
+                case "show_estimates" -> settings.setShowEstimates(Boolean.parseBoolean(value));
+                case "show_confidence_levels" -> settings.setShowConfidenceLevels(Boolean.parseBoolean(value));
+                case "show_fun_facts" -> settings.setShowFunFacts(Boolean.parseBoolean(value));
+                case "show_achievements" -> settings.setShowAchievements(Boolean.parseBoolean(value));
+                case "show_repository_comparisons" -> settings.setShowRepositoryComparisons(Boolean.parseBoolean(value));
+                case "show_git_statistics" -> settings.setShowGitStatistics(Boolean.parseBoolean(value));
+
+                // Story
+                case "theme" -> settings.setTheme(Settings.ThemeMode.valueOf(value.toUpperCase()));
+                case "story_density" -> settings.setStoryDensity(value);
+                case "verbosity" -> settings.setVerbosity(value);
+                case "whitespace_level" -> settings.setWhitespaceLevel(value);
+                case "maximum_comparisons_per_section" -> settings.setMaximumComparisonsPerSection(Integer.parseInt(value));
+                case "headline_strategy" -> settings.setHeadlineStrategy(Settings.HeadlineStrategy.valueOf(value.toUpperCase()));
             }
-        } catch (IllegalArgumentException ignored) {
+        } catch (Exception ignored) {
             // Skip invalid values
         }
     }

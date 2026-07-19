@@ -1,151 +1,230 @@
 package dev.codemeter.core.model;
 
-/**
- * Application settings, persisted to config.toml.
- */
 public class Settings {
 
     public enum ThemeMode { DARK, LIGHT, SYSTEM }
     public enum MeasurementSystem { METRIC, IMPERIAL }
     public enum PaperSize { A4, LETTER, LEGAL, A3 }
-    public enum MarginType { NORMAL, NARROW, CUSTOM }
-    public enum InkType { LASER, INKJET, DRAFT, CUSTOM }
+    public enum ScannerBackend { SCC, CLOC, NATIVE }
+    public enum HeadlineStrategy { PHYSICAL, SCALE, DEFAULT }
 
-    // Theme
-    private ThemeMode theme = ThemeMode.DARK;
-    private boolean animationsEnabled = true;
+    // Backend
+    private ScannerBackend scannerBackend = ScannerBackend.SCC;
+    private boolean gitIntegration = true;
+    private boolean parallelism = true;
+    private boolean cacheEnabled = true;
 
-    // Measurement
-    private MeasurementSystem measurement = MeasurementSystem.METRIC;
-
-    // Print settings
-    private PaperSize paperSize = PaperSize.A4;
-    private MarginType marginType = MarginType.NORMAL;
+    // Typography
     private String fontName = "JetBrains Mono";
-    private int fontSize = 10;
+    private int fontSizePt = 11;
+    private double characterWidthMm = 1.50; // Replaced 2.5mm
+    private double characterHeightMm = 4.23;
     private double lineSpacing = 1.15;
-    private InkType inkType = InkType.LASER;
-    private double paperThicknessMm = 0.1;
+    private int tabWidthSpaces = 4;
+    private int charactersPerTab = 4;
 
-    // Margins in mm
-    private double marginTop = 25.4;
-    private double marginBottom = 25.4;
-    private double marginLeft = 25.4;
-    private double marginRight = 25.4;
+    // Paper
+    private PaperSize paperSize = PaperSize.A4;
+    private double pageWidthMm = 210.0;
+    private double pageHeightMm = 297.0;
+    private double marginTopMm = 25.4;
+    private double marginBottomMm = 25.4;
+    private double marginLeftMm = 25.4;
+    private double marginRightMm = 25.4;
+    private double paperWeightGsm = 80.0;
+    private double paperThicknessMm = 0.10;
+    private boolean doubleSidedPrinting = true;
+    private double bindingMarginMm = 10.0;
 
-    // Feature toggles
-    private boolean comparisonObjectsEnabled = true;
-    private boolean historyEnabled = true;
+    // Printing
+    private int printerDpi = 600;
+    private double inkCoveragePercent = 5.0;
+    private double printingCostPerPage = 0.05;
+    private double bindingCostPerBook = 5.00;
+    private int pagesPerBook = 300;
+    private int pagesPerPrinterTray = 500;
+    private int pagesPerBox = 2500;
+    private double shelfWidthPerBookMm = 30.0;
+    private double averagePrintSpeedPpm = 30.0;
 
-    // Getters and setters
-    public ThemeMode getTheme() { return theme; }
-    public void setTheme(ThemeMode theme) { this.theme = theme; }
+    // Environment
+    private double treePagesPerTree = 8333.0;
+    private double co2PerSheetGrams = 4.5;
+    private double paperRecyclingFactor = 0.6;
 
-    public boolean isAnimationsEnabled() { return animationsEnabled; }
-    public void setAnimationsEnabled(boolean enabled) { this.animationsEnabled = enabled; }
+    // Reading & Writing
+    private double readingSpeedWpm = 250.0;
+    private double typingSpeedWpm = 60.0;
+    private double workingHoursPerDay = 8.0;
+    private double averageWordLength = 5.0;
+    private double averageSentenceLength = 15.0;
 
-    public MeasurementSystem getMeasurement() { return measurement; }
-    public void setMeasurement(MeasurementSystem measurement) { this.measurement = measurement; }
+    // Distance Calculations
+    private double characterSpacingMm = 0.1;
+    private double spaceCharacterWidthMm = 1.50;
+    private double tabRenderWidthMm = 6.0;
 
-    public PaperSize getPaperSize() { return paperSize; }
-    public void setPaperSize(PaperSize paperSize) { this.paperSize = paperSize; }
+    // Comparison Preferences
+    private String comparisonStyle = "EDITORIAL";
+    private String comparisonUnits = "EVERYDAY";
+    private MeasurementSystem measurementSystem = MeasurementSystem.METRIC;
+    private boolean showEstimates = true;
+    private boolean showConfidenceLevels = true;
+    private boolean showFunFacts = true;
+    private boolean showAchievements = true;
+    private boolean showRepositoryComparisons = true;
+    private boolean showGitStatistics = true;
 
-    public MarginType getMarginType() { return marginType; }
-    public void setMarginType(MarginType marginType) { this.marginType = marginType; }
+    // Story
+    private ThemeMode theme = ThemeMode.DARK;
+    private String storyDensity = "SPACIOUS";
+    private String verbosity = "HIGH";
+    private String whitespaceLevel = "HIGH";
+    private int maximumComparisonsPerSection = 3;
+    private HeadlineStrategy headlineStrategy = HeadlineStrategy.PHYSICAL;
 
+    // Getters and Setters
+
+    // Backend
+    public ScannerBackend getScannerBackend() { return scannerBackend; }
+    public void setScannerBackend(ScannerBackend backend) { this.scannerBackend = backend; }
+    public boolean isGitIntegration() { return gitIntegration; }
+    public void setGitIntegration(boolean git) { this.gitIntegration = git; }
+    public boolean isParallelism() { return parallelism; }
+    public void setParallelism(boolean par) { this.parallelism = par; }
+    public boolean isCacheEnabled() { return cacheEnabled; }
+    public void setCacheEnabled(boolean cache) { this.cacheEnabled = cache; }
+
+    // Typography
     public String getFontName() { return fontName; }
-    public void setFontName(String fontName) { this.fontName = fontName; }
-
-    public int getFontSize() { return fontSize; }
-    public void setFontSize(int fontSize) { this.fontSize = Math.max(6, Math.min(30, fontSize)); }
-
+    public void setFontName(String f) { this.fontName = f; }
+    public int getFontSizePt() { return fontSizePt; }
+    public void setFontSizePt(int s) { this.fontSizePt = s; }
+    public double getCharacterWidthMm() { return characterWidthMm; }
+    public void setCharacterWidthMm(double v) { this.characterWidthMm = v; }
+    public double getCharacterHeightMm() { return characterHeightMm; }
+    public void setCharacterHeightMm(double v) { this.characterHeightMm = v; }
     public double getLineSpacing() { return lineSpacing; }
-    public void setLineSpacing(double lineSpacing) { this.lineSpacing = lineSpacing; }
+    public void setLineSpacing(double v) { this.lineSpacing = v; }
+    public int getTabWidthSpaces() { return tabWidthSpaces; }
+    public void setTabWidthSpaces(int v) { this.tabWidthSpaces = v; }
+    public int getCharactersPerTab() { return charactersPerTab; }
+    public void setCharactersPerTab(int v) { this.charactersPerTab = v; }
 
-    public InkType getInkType() { return inkType; }
-    public void setInkType(InkType inkType) { this.inkType = inkType; }
-
+    // Paper
+    public PaperSize getPaperSize() { return paperSize; }
+    public void setPaperSize(PaperSize p) { this.paperSize = p; }
+    public double getPageWidthMm() { return pageWidthMm; }
+    public void setPageWidthMm(double v) { this.pageWidthMm = v; }
+    public double getPageHeightMm() { return pageHeightMm; }
+    public void setPageHeightMm(double v) { this.pageHeightMm = v; }
+    public double getMarginTopMm() { return marginTopMm; }
+    public void setMarginTopMm(double v) { this.marginTopMm = v; }
+    public double getMarginBottomMm() { return marginBottomMm; }
+    public void setMarginBottomMm(double v) { this.marginBottomMm = v; }
+    public double getMarginLeftMm() { return marginLeftMm; }
+    public void setMarginLeftMm(double v) { this.marginLeftMm = v; }
+    public double getMarginRightMm() { return marginRightMm; }
+    public void setMarginRightMm(double v) { this.marginRightMm = v; }
+    public double getPaperWeightGsm() { return paperWeightGsm; }
+    public void setPaperWeightGsm(double v) { this.paperWeightGsm = v; }
     public double getPaperThicknessMm() { return paperThicknessMm; }
-    public void setPaperThicknessMm(double thickness) { this.paperThicknessMm = thickness; }
+    public void setPaperThicknessMm(double v) { this.paperThicknessMm = v; }
+    public boolean isDoubleSidedPrinting() { return doubleSidedPrinting; }
+    public void setDoubleSidedPrinting(boolean d) { this.doubleSidedPrinting = d; }
+    public double getBindingMarginMm() { return bindingMarginMm; }
+    public void setBindingMarginMm(double v) { this.bindingMarginMm = v; }
 
-    public double getMarginTop() { return marginTop; }
-    public void setMarginTop(double mm) { this.marginTop = mm; }
+    // Printing
+    public int getPrinterDpi() { return printerDpi; }
+    public void setPrinterDpi(int v) { this.printerDpi = v; }
+    public double getInkCoveragePercent() { return inkCoveragePercent; }
+    public void setInkCoveragePercent(double v) { this.inkCoveragePercent = v; }
+    public double getPrintingCostPerPage() { return printingCostPerPage; }
+    public void setPrintingCostPerPage(double v) { this.printingCostPerPage = v; }
+    public double getBindingCostPerBook() { return bindingCostPerBook; }
+    public void setBindingCostPerBook(double v) { this.bindingCostPerBook = v; }
+    public int getPagesPerBook() { return pagesPerBook; }
+    public void setPagesPerBook(int v) { this.pagesPerBook = v; }
+    public int getPagesPerPrinterTray() { return pagesPerPrinterTray; }
+    public void setPagesPerPrinterTray(int v) { this.pagesPerPrinterTray = v; }
+    public int getPagesPerBox() { return pagesPerBox; }
+    public void setPagesPerBox(int v) { this.pagesPerBox = v; }
+    public double getShelfWidthPerBookMm() { return shelfWidthPerBookMm; }
+    public void setShelfWidthPerBookMm(double v) { this.shelfWidthPerBookMm = v; }
+    public double getAveragePrintSpeedPpm() { return averagePrintSpeedPpm; }
+    public void setAveragePrintSpeedPpm(double v) { this.averagePrintSpeedPpm = v; }
 
-    public double getMarginBottom() { return marginBottom; }
-    public void setMarginBottom(double mm) { this.marginBottom = mm; }
+    // Environment
+    public double getTreePagesPerTree() { return treePagesPerTree; }
+    public void setTreePagesPerTree(double v) { this.treePagesPerTree = v; }
+    public double getCo2PerSheetGrams() { return co2PerSheetGrams; }
+    public void setCo2PerSheetGrams(double v) { this.co2PerSheetGrams = v; }
+    public double getPaperRecyclingFactor() { return paperRecyclingFactor; }
+    public void setPaperRecyclingFactor(double v) { this.paperRecyclingFactor = v; }
 
-    public double getMarginLeft() { return marginLeft; }
-    public void setMarginLeft(double mm) { this.marginLeft = mm; }
+    // Reading & Writing
+    public double getReadingSpeedWpm() { return readingSpeedWpm; }
+    public void setReadingSpeedWpm(double v) { this.readingSpeedWpm = v; }
+    public double getTypingSpeedWpm() { return typingSpeedWpm; }
+    public void setTypingSpeedWpm(double v) { this.typingSpeedWpm = v; }
+    public double getWorkingHoursPerDay() { return workingHoursPerDay; }
+    public void setWorkingHoursPerDay(double v) { this.workingHoursPerDay = v; }
+    public double getAverageWordLength() { return averageWordLength; }
+    public void setAverageWordLength(double v) { this.averageWordLength = v; }
+    public double getAverageSentenceLength() { return averageSentenceLength; }
+    public void setAverageSentenceLength(double v) { this.averageSentenceLength = v; }
 
-    public double getMarginRight() { return marginRight; }
-    public void setMarginRight(double mm) { this.marginRight = mm; }
+    // Distance Calculations
+    public double getCharacterSpacingMm() { return characterSpacingMm; }
+    public void setCharacterSpacingMm(double v) { this.characterSpacingMm = v; }
+    public double getSpaceCharacterWidthMm() { return spaceCharacterWidthMm; }
+    public void setSpaceCharacterWidthMm(double v) { this.spaceCharacterWidthMm = v; }
+    public double getTabRenderWidthMm() { return tabRenderWidthMm; }
+    public void setTabRenderWidthMm(double v) { this.tabRenderWidthMm = v; }
 
-    public boolean isComparisonObjectsEnabled() { return comparisonObjectsEnabled; }
-    public void setComparisonObjectsEnabled(boolean enabled) { this.comparisonObjectsEnabled = enabled; }
+    // Comparison Preferences
+    public String getComparisonStyle() { return comparisonStyle; }
+    public void setComparisonStyle(String v) { this.comparisonStyle = v; }
+    public String getComparisonUnits() { return comparisonUnits; }
+    public void setComparisonUnits(String v) { this.comparisonUnits = v; }
+    public MeasurementSystem getMeasurementSystem() { return measurementSystem; }
+    public void setMeasurementSystem(MeasurementSystem v) { this.measurementSystem = v; }
+    public boolean isShowEstimates() { return showEstimates; }
+    public void setShowEstimates(boolean v) { this.showEstimates = v; }
+    public boolean isShowConfidenceLevels() { return showConfidenceLevels; }
+    public void setShowConfidenceLevels(boolean v) { this.showConfidenceLevels = v; }
+    public boolean isShowFunFacts() { return showFunFacts; }
+    public void setShowFunFacts(boolean v) { this.showFunFacts = v; }
+    public boolean isShowAchievements() { return showAchievements; }
+    public void setShowAchievements(boolean v) { this.showAchievements = v; }
+    public boolean isShowRepositoryComparisons() { return showRepositoryComparisons; }
+    public void setShowRepositoryComparisons(boolean v) { this.showRepositoryComparisons = v; }
+    public boolean isShowGitStatistics() { return showGitStatistics; }
+    public void setShowGitStatistics(boolean v) { this.showGitStatistics = v; }
 
-    public boolean isHistoryEnabled() { return historyEnabled; }
-    public void setHistoryEnabled(boolean enabled) { this.historyEnabled = enabled; }
+    // Story
+    public ThemeMode getTheme() { return theme; }
+    public void setTheme(ThemeMode v) { this.theme = v; }
+    public String getStoryDensity() { return storyDensity; }
+    public void setStoryDensity(String v) { this.storyDensity = v; }
+    public String getVerbosity() { return verbosity; }
+    public void setVerbosity(String v) { this.verbosity = v; }
+    public String getWhitespaceLevel() { return whitespaceLevel; }
+    public void setWhitespaceLevel(String v) { this.whitespaceLevel = v; }
+    public int getMaximumComparisonsPerSection() { return maximumComparisonsPerSection; }
+    public void setMaximumComparisonsPerSection(int v) { this.maximumComparisonsPerSection = v; }
+    public HeadlineStrategy getHeadlineStrategy() { return headlineStrategy; }
+    public void setHeadlineStrategy(HeadlineStrategy v) { this.headlineStrategy = v; }
 
-    // Paper dimensions in mm
-    public double getPaperWidthMm() {
-        return switch (paperSize) {
-            case A4 -> 210;
-            case LETTER -> 215.9;
-            case LEGAL -> 215.9;
-            case A3 -> 297;
-        };
-    }
-
-    public double getPaperHeightMm() {
-        return switch (paperSize) {
-            case A4 -> 297;
-            case LETTER -> 279.4;
-            case LEGAL -> 355.6;
-            case A3 -> 420;
-        };
-    }
-
-    /**
-     * Returns printable width in mm (total width minus left and right margins).
-     */
+    // Utility 
     public double getPrintableWidthMm() {
-        if (marginType == MarginType.NARROW) {
-            return getPaperWidthMm() - 25.4; // ~0.5 inch each side
-        }
-        return getPaperWidthMm() - marginLeft - marginRight;
+        return pageWidthMm - marginLeftMm - marginRightMm;
     }
-
-    /**
-     * Returns printable height in mm.
-     */
     public double getPrintableHeightMm() {
-        if (marginType == MarginType.NARROW) {
-            return getPaperHeightMm() - 25.4;
-        }
-        return getPaperHeightMm() - marginTop - marginBottom;
+        return pageHeightMm - marginTopMm - marginBottomMm;
     }
-
-    /**
-     * Returns approximate character width in mm for the configured font and size.
-     * Monospace font: character width ≈ fontSize * 0.6 (in points → mm conversion).
-     */
-    public double getCharWidthMm() {
-        // 1 pt = 0.3528 mm, monospace ratio ≈ 0.6
-        return fontSize * 0.3528 * 0.6;
-    }
-
-    /**
-     * Returns line height in mm for the configured font size and spacing.
-     */
-    public double getLineHeightMm() {
-        return fontSize * 0.3528 * lineSpacing;
-    }
-
-    /**
-     * Returns paper weight per sheet in grams (standard 80 gsm paper).
-     */
     public double getSheetWeightGrams() {
-        double areaSqM = (getPaperWidthMm() / 1000.0) * (getPaperHeightMm() / 1000.0);
-        return areaSqM * 80; // 80 gsm standard
+        return (pageWidthMm / 1000.0) * (pageHeightMm / 1000.0) * paperWeightGsm;
     }
 }

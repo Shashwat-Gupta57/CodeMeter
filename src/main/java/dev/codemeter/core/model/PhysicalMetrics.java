@@ -44,7 +44,21 @@ public record PhysicalMetrics(
         double estimatedWeightLbs,
         double printerTrays,
         double bookshelves,
+        double sheetsRequired,
+        double doubleSidedPages,
+        double booksRequired,
+        double bindersRequired,
+        double boxesNeeded,
+        double inkEstimationLiters,
+        double timeToPrintMinutes,
+        double estimatedPrintingCost,
 
         // Pages
-        long totalPages
+        long totalPages,
+        
+        // Memory & Complexity Estimations
+        long estimatedUtf8Size,
+        long estimatedUtf16Size,
+        long estimatedTokenCount,
+        long estimatedAstNodes
 ) {}

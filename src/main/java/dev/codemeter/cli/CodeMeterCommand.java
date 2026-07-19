@@ -16,6 +16,7 @@ import picocli.CommandLine.Command;
         mixinStandardHelpOptions = true,
         subcommands = {
                 ScanCommand.class,
+                ConfigCommand.class,
                 ExportCommand.class,
                 WrappedCommand.class
         }

@@ -45,6 +45,7 @@ class PhysicalCalculatorTest {
         // 1,000,000 chars * 2.5mm = 2500m = 2.5km
         ScanResult result = createSampleResult(10_000, 1_000_000, 10_700);
         Settings settings = new Settings();
+        settings.setCharacterWidthMm(2.5);
 
         PhysicalMetrics pm = PhysicalCalculator.calculate(result, settings);
 

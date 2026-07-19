@@ -10,17 +10,8 @@ import dev.codemeter.core.model.Settings;
  */
 public final class PhysicalCalculator {
 
-    // Character dimensions (monospace font ~2.5mm per character)
-    private static final double CHAR_WIDTH_MM = 2.5;
-
-    // Paper dimensions (A4 default)
-    private static final double DEFAULT_LINES_PER_PAGE = 55;
-    private static final double SHEET_THICKNESS_MM = 0.1;
-    private static final double SHEET_WEIGHT_GRAMS = 5.0; // ~80 gsm A4
-
     // Real-world reference measurements
     private static final double FOOTBALL_FIELD_M = 100.0; // FIFA standard length
-    private static final double FOOTBALL_FIELD_AREA_SQM = 7140.0; // 105m x 68m
     private static final double CRICKET_GROUND_AREA_SQM = 15393.0; // ~70m radius circle
     private static final double BASKETBALL_COURT_AREA_SQM = 420.0; // 28m x 15m
     private static final double TENNIS_COURT_AREA_SQM = 260.87; // 23.77m x 10.97m
@@ -36,12 +27,6 @@ public final class PhysicalCalculator {
     private static final double MARATHON_KM = 42.195;
     private static final double CENTRAL_PARK_LOOP_KM = 10.0;
 
-    // Paper and printing
-    private static final double TREE_PAGES = 8333.0; // One tree ≈ 8,333 pages
-    private static final double SHELF_WIDTH_PER_PAGE_MM = 0.1; // Sheet thickness
-    private static final double PRINTER_TRAY_PAGES = 500.0;
-    private static final double BOOKSHELF_WIDTH_M = 0.9; // Standard bookshelf width
-
     private PhysicalCalculator() {}
 
     /**
@@ -53,20 +38,29 @@ public final class PhysicalCalculator {
         double avgLineLength = result.averageLineLength() > 0 ? result.averageLineLength() : 40;
 
         // Character length: total characters * char width
-        double charLengthMm = totalChars * CHAR_WIDTH_MM;
+        double charWidthMm = settings != null ? settings.getCharacterWidthMm() : 1.5;
+        double charLengthMm = totalChars * charWidthMm;
         double charLengthKm = charLengthMm / 1_000_000.0;
         double charLengthMiles = charLengthKm * 0.621371;
 
         // Vertical stack: pages stacked
-        double linesPerPage = DEFAULT_LINES_PER_PAGE;
+        double printableHeightMm = settings != null ? settings.getPrintableHeightMm() : 246.2;
+        double lineHeightMm = settings != null ? (settings.getFontSizePt() * 0.3528 * settings.getLineSpacing()) : 4.5;
+        double linesPerPage = Math.max(1.0, Math.floor(printableHeightMm / lineHeightMm));
+        
         long totalPages = (long) Math.ceil((double) totalLines / linesPerPage);
-        double thickness = settings != null ? settings.getPaperThicknessMm() : SHEET_THICKNESS_MM;
-        double verticalStackMm = totalPages * thickness;
+        
+        boolean doubleSided = settings != null ? settings.isDoubleSidedPrinting() : true;
+        double sheetsRequired = doubleSided ? Math.ceil(totalPages / 2.0) : totalPages;
+        double doubleSidedPages = doubleSided ? Math.ceil(totalPages / 2.0) : totalPages;
+        
+        double thickness = settings != null ? settings.getPaperThicknessMm() : 0.1;
+        double verticalStackMm = sheetsRequired * thickness;
         double verticalStackMeters = verticalStackMm / 1000.0;
         double verticalStackFeet = verticalStackMeters * 3.28084;
 
         // Horizontal length: all lines end to end
-        double horizontalLengthMm = totalLines * avgLineLength * CHAR_WIDTH_MM;
+        double horizontalLengthMm = totalLines * avgLineLength * charWidthMm;
         double horizontalLengthKm = horizontalLengthMm / 1_000_000.0;
         double horizontalLengthMiles = horizontalLengthKm * 0.621371;
 
@@ -91,14 +85,46 @@ public final class PhysicalCalculator {
         double centralParkLoops = charLengthKm / CENTRAL_PARK_LOOP_KM;
 
         // Paper & printing
-        double treesRequired = totalPages / TREE_PAGES;
-        double shelfWidthMm = totalPages * SHELF_WIDTH_PER_PAGE_MM;
+        double treePages = settings != null ? settings.getTreePagesPerTree() : 8333.0;
+        double treesRequired = sheetsRequired / treePages;
+        double shelfWidthMm = sheetsRequired * thickness;
         double shelfWidthMeters = shelfWidthMm / 1000.0;
         double shelfWidthFeet = shelfWidthMeters * 3.28084;
-        double weightKg = (totalPages * SHEET_WEIGHT_GRAMS) / 1000.0;
+        
+        double sheetWeightGrams = settings != null ? settings.getSheetWeightGrams() : 5.0;
+        double weightKg = (sheetsRequired * sheetWeightGrams) / 1000.0;
         double weightLbs = weightKg * 2.20462;
-        double printerTrays = totalPages / PRINTER_TRAY_PAGES;
-        double bookshelves = shelfWidthMeters / BOOKSHELF_WIDTH_M;
+        
+        double printerTrayPages = settings != null ? settings.getPagesPerPrinterTray() : 500.0;
+        double printerTrays = sheetsRequired / printerTrayPages;
+        
+        double bookshelfWidthM = 0.9;
+        double bookshelves = shelfWidthMeters / bookshelfWidthM;
+        
+        // Extended printing metrics
+        double pagesPerBook = settings != null ? settings.getPagesPerBook() : 300.0;
+        double booksRequired = Math.ceil(sheetsRequired / (pagesPerBook / (doubleSided ? 2 : 1)));
+        double bindersRequired = Math.ceil(sheetsRequired / 500.0);
+        
+        double pagesPerBox = settings != null ? settings.getPagesPerBox() : 2500.0;
+        double boxesNeeded = Math.ceil(sheetsRequired / pagesPerBox);
+        
+        double inkCoverage = settings != null ? settings.getInkCoveragePercent() : 5.0;
+        // A typical ink cartridge is ~15ml for ~800k characters at standard 5% coverage
+        double inkEstimationLiters = totalChars * (0.015 / 800000.0) * (inkCoverage / 5.0); 
+        
+        double printSpeed = settings != null ? settings.getAveragePrintSpeedPpm() : 30.0;
+        double timeToPrintMinutes = totalPages / printSpeed; // Print speed is usually in pages/images per minute, not sheets
+        
+        double printCost = settings != null ? settings.getPrintingCostPerPage() : 0.05;
+        // Cost is usually per page image, not per sheet
+        double estimatedPrintingCost = totalPages * printCost;
+
+        // Memory & Complexity
+        long estimatedUtf8Size = totalChars; // Rough estimate assuming ASCII-heavy
+        long estimatedUtf16Size = totalChars * 2;
+        long estimatedTokenCount = result.totalWords() > 0 ? result.totalWords() : totalChars / 4;
+        long estimatedAstNodes = totalLines * 5;
 
         return new PhysicalMetrics(
                 charLengthKm, charLengthMiles,
@@ -110,7 +136,10 @@ public final class PhysicalCalculator {
                 earthPercent, moonPercent, marathons, centralParkLoops,
                 treesRequired, shelfWidthMeters, shelfWidthFeet,
                 weightKg, weightLbs, printerTrays, bookshelves,
-                totalPages
+                sheetsRequired, doubleSidedPages, booksRequired, bindersRequired,
+                boxesNeeded, inkEstimationLiters, timeToPrintMinutes, estimatedPrintingCost,
+                totalPages,
+                estimatedUtf8Size, estimatedUtf16Size, estimatedTokenCount, estimatedAstNodes
         );
     }
 

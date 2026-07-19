@@ -41,9 +41,8 @@ public final class PrintCalculator {
         double printableWidthMm = settings.getPrintableWidthMm();
         double printableHeightMm = settings.getPrintableHeightMm();
 
-        // Character and line dimensions
-        double charWidthMm = settings.getCharWidthMm();
-        double lineHeightMm = settings.getLineHeightMm();
+        double charWidthMm = settings.getCharacterWidthMm();
+        double lineHeightMm = settings.getFontSizePt() * 0.3528 * settings.getLineSpacing();
 
         // Characters per line and lines per page
         int charsPerLine = (int) Math.floor(printableWidthMm / charWidthMm);
@@ -66,13 +65,7 @@ public final class PrintCalculator {
         double totalWeightKg = (totalPages * sheetWeight) / 1000.0;
         double totalWeightLbs = totalWeightKg * 2.20462;
 
-        // Ink usage
-        double inkMlPerPage = switch (settings.getInkType()) {
-            case LASER -> LASER_INK_ML_PER_PAGE;
-            case INKJET -> INKJET_INK_ML_PER_PAGE;
-            case DRAFT -> DRAFT_INK_ML_PER_PAGE;
-            case CUSTOM -> LASER_INK_ML_PER_PAGE;
-        };
+        double inkMlPerPage = LASER_INK_ML_PER_PAGE;
         double inkMl = totalPages * inkMlPerPage;
         double inkCartridges = inkMl / CARTRIDGE_ML;
 
@@ -91,11 +84,11 @@ public final class PrintCalculator {
         return new PrintedMetrics(
                 settings.getPaperSize().name(),
                 settings.getFontName(),
-                settings.getFontSize(),
+                settings.getFontSizePt(),
                 settings.getLineSpacing(),
-                settings.getMarginType().name(),
+                "NORMAL",
                 settings.getPaperThicknessMm(),
-                settings.getInkType().name(),
+                "LASER",
                 totalPages,
                 linesPerPage,
                 charsPerLine,

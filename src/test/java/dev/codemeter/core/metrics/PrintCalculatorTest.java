@@ -48,15 +48,14 @@ class PrintCalculatorTest {
         ScanResult result = createSampleResult(10_000, 500_000);
 
         Settings a4Settings = new Settings();
-        a4Settings.setPaperSize(Settings.PaperSize.A4);
+        a4Settings.setPageHeightMm(297.0);
         PrintedMetrics a4 = PrintCalculator.calculate(result, a4Settings);
 
         Settings letterSettings = new Settings();
-        letterSettings.setPaperSize(Settings.PaperSize.LETTER);
+        letterSettings.setPageHeightMm(279.4);
         PrintedMetrics letter = PrintCalculator.calculate(result, letterSettings);
 
-        // A4 is taller than Letter, so should fit more lines per page
-        assertThat(a4.linesPerPage()).isNotEqualTo(letter.linesPerPage());
+        assertThat(a4.linesPerPage()).isGreaterThan(letter.linesPerPage());
     }
 
     @Test
@@ -64,32 +63,15 @@ class PrintCalculatorTest {
         ScanResult result = createSampleResult(10_000, 500_000);
 
         Settings smallFont = new Settings();
-        smallFont.setFontSize(8);
+        smallFont.setFontSizePt(8);
         PrintedMetrics small = PrintCalculator.calculate(result, smallFont);
 
         Settings largeFont = new Settings();
-        largeFont.setFontSize(14);
+        largeFont.setFontSizePt(14);
         PrintedMetrics large = PrintCalculator.calculate(result, largeFont);
 
-        // Smaller font = more lines per page = fewer total pages
         assertThat(small.linesPerPage()).isGreaterThan(large.linesPerPage());
         assertThat(small.totalPages()).isLessThan(large.totalPages());
-    }
-
-    @Test
-    void calculate_inkTypes_differentUsage() {
-        ScanResult result = createSampleResult(10_000, 500_000);
-
-        Settings laserSettings = new Settings();
-        laserSettings.setInkType(Settings.InkType.LASER);
-        PrintedMetrics laser = PrintCalculator.calculate(result, laserSettings);
-
-        Settings inkjetSettings = new Settings();
-        inkjetSettings.setInkType(Settings.InkType.INKJET);
-        PrintedMetrics inkjet = PrintCalculator.calculate(result, inkjetSettings);
-
-        // Inkjet uses more ink per page
-        assertThat(inkjet.inkMl()).isGreaterThan(laser.inkMl());
     }
 
     @Test
