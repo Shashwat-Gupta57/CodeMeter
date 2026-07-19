@@ -13,7 +13,7 @@ import java.util.List;
 
 public class ScanPresenter {
 
-    private static final String FULL_BLOCK = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━";
+    private static final String FULL_BLOCK = "==============================================";
 
     public static void printHeader(String path) {
         System.out.println(Ansi.AUTO.string("@|bold,cyan " + FULL_BLOCK + "|@"));
@@ -31,13 +31,13 @@ public class ScanPresenter {
     public static void printProgress(int percent) {
         int width = 33;
         int filled = (percent * width) / 100;
-        String bar = "█".repeat(filled) + "░".repeat(width - filled);
+        String bar = "#".repeat(filled) + "-".repeat(width - filled);
         System.out.print(Ansi.AUTO.string("\r@|cyan " + bar + "|@ @|bold " + percent + "%|@"));
     }
 
     public static void printProgressComplete() {
         int width = 33;
-        String bar = "█".repeat(width);
+        String bar = "#".repeat(width);
         System.out.print(Ansi.AUTO.string("\r@|cyan " + bar + "|@ @|bold 100%|@\n"));
     }
 
@@ -108,7 +108,7 @@ public class ScanPresenter {
             System.out.println(Ansi.AUTO.string("@|faint " + String.format("%.1f%%", pct) + "|@"));
             
             int barWidth = Math.min((int) (pct / 2.5), 23); // 23 max length for 100%
-            String bar = "█".repeat(barWidth);
+            String bar = "#".repeat(barWidth);
             System.out.println(Ansi.AUTO.string("@|blue " + bar + "|@"));
             System.out.println();
         }

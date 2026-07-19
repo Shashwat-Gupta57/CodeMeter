@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 public class WrappedPresenter {
 
-    private static final String FULL_BLOCK = "████████████████████████████████████████████████";
-    private static final String LINE = "────────────────────────────────────────────────";
+    private static final String FULL_BLOCK = "==============================================";
+    private static final String LINE = "----------------------------------------------";
 
     public static void printWrapped(List<HistoryEntry> history, List<Achievement> achievements) {
         if (history == null || history.isEmpty()) {
