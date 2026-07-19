@@ -41,34 +41,3 @@ jobs:
         with:
           name: codemeter-${{ matrix.os }}
           path: build/libs/codemeter.jar
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Build Shadow JAR
-        run: ./gradlew shadowJar
-
-      - name: Get version
-        id: version
-        run: echo "VERSION=$(grep '^version' build.gradle.kts | head -1 | grep -oP '\"[^\"]+\"' | tr -d '\"')" >> $GITHUB_OUTPUT
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: build/libs/codemeter.jar
-          generate_release_notes: true

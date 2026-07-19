@@ -7,7 +7,7 @@ First off, thank you for considering contributing to CodeMeter!
 1. Ensure you have **Java 21** installed.
 2. Clone the repository: `git clone https://github.com/Shashwat-Gupta57/CodeMeter.git`
 3. Build the project using Gradle: `./gradlew build`
-4. Run the TUI locally: `./gradlew run`
+4. Run the CLI locally: `java -jar build/libs/codemeter.jar scan .`
 
 ## Submitting Pull Requests
 

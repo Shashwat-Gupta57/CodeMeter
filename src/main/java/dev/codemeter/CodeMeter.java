@@ -7,12 +7,12 @@ import picocli.CommandLine;
  * CodeMeter — Measure your code. Physically.
  * 
  * Main entry point for the application.
- * Launches the interactive TUI by default, or processes CLI subcommands.
+ * Parses CLI subcommands via Picocli and delegates to the appropriate handler.
  */
 public final class CodeMeter {
 
     public static final String NAME = "CodeMeter";
-    public static final String VERSION = "1.0.0";
+    public static final String VERSION = "2.5.0";
     public static final String TAGLINE = "Measure your code. Physically.";
 
     public static void main(String[] args) {

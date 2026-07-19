@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "dev.codemeter"
-version = "1.0.0"
+version = "2.5.0"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21

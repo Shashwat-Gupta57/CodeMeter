@@ -2,8 +2,9 @@
 
 **Measure your code. Physically.**
 
+![Version](https://img.shields.io/github/v/release/Shashwat-Gupta57/CodeMeter?color=blue)
 ![License](https://img.shields.io/github/license/Shashwat-Gupta57/CodeMeter)
-![Build](https://img.shields.io/github/actions/workflow/status/Shashwat-Gupta57/CodeMeter/release.yml?branch=main)
+![Build](https://img.shields.io/github/actions/workflow/status/Shashwat-Gupta57/CodeMeter/ci.yml?branch=main)
 
 CodeMeter is a modern, blazing-fast CLI application that doesn't just tell you how many lines of code you have—it tells you what that means in the real world. 
 

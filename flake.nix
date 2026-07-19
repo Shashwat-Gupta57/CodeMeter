@@ -1,5 +1,5 @@
 {
-  description = "Measure your code. Physically.";
+  description = "CodeMeter — Measure your code. Physically.";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -11,39 +11,29 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        version = "2.3.5";
-
-        hashes = {
-          x86_64-linux = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-          aarch64-linux = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-          x86_64-darwin = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-          aarch64-darwin = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-        };
-
-        urls = {
-          x86_64-linux = "https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v${version}/codemeter-linux-amd64";
-          aarch64-linux = "https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v${version}/codemeter-linux-arm64";
-          x86_64-darwin = "https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v${version}/codemeter-macos-amd64";
-          aarch64-darwin = "https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v${version}/codemeter-macos-arm64";
-        };
-
-        binaryUrl = urls.${system} or (throw "Unsupported system: ${system}");
-        binaryHash = hashes.${system} or (throw "Unsupported system: ${system}");
-
         codemeter = pkgs.stdenv.mkDerivation {
           pname = "codemeter";
-          inherit version;
+          version = "2.5.0";
 
-          src = pkgs.fetchurl {
-            url = binaryUrl;
-            hash = binaryHash;
-          };
+          src = self;
 
-          dontUnpack = true;
+          nativeBuildInputs = with pkgs; [
+            jdk21
+            gradle
+          ];
+
+          buildPhase = ''
+            export GRADLE_USER_HOME=$(mktemp -d)
+            gradle shadowJar --no-daemon
+          '';
 
           installPhase = ''
-            mkdir -p $out/bin
-            cp $src $out/bin/codemeter
+            mkdir -p $out/bin $out/lib
+            cp build/libs/codemeter.jar $out/lib/codemeter.jar
+            cat > $out/bin/codemeter << EOF
+            #!/usr/bin/env bash
+            exec ${pkgs.jdk21}/bin/java -jar $out/lib/codemeter.jar "\$@"
+            EOF
             chmod +x $out/bin/codemeter
           '';
 
@@ -51,7 +41,6 @@
             description = "Measure your code. Physically.";
             homepage = "https://github.com/Shashwat-Gupta57/CodeMeter";
             license = licenses.mit;
-            platforms = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
             mainProgram = "codemeter";
           };
         };
@@ -61,16 +50,12 @@
           codemeter = codemeter;
         };
 
-        apps = {
-          default = flake-utils.lib.mkApp {
-            drv = codemeter;
-          };
+        apps.default = flake-utils.lib.mkApp {
+          drv = codemeter;
         };
 
         devShells.default = pkgs.mkShell {
-          buildInputs = [
-            codemeter
-          ];
+          buildInputs = [ codemeter ];
         };
       }
     );
