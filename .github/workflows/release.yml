@@ -16,9 +16,6 @@ jobs:
           - os: ubuntu-24.04-arm
             arch: arm64
             target: codemeter-linux-arm64
-          - os: macos-13
-            arch: amd64
-            target: codemeter-macos-amd64
           - os: macos-14
             arch: arm64
             target: codemeter-macos-arm64
@@ -210,12 +207,6 @@ jobs:
     needs: release
     runs-on: ubuntu-latest
     steps:
-      - name: Download macOS Intel Binary
-        uses: actions/download-artifact@v4
-        with:
-          name: native-codemeter-macos-amd64
-          path: artifacts
-
       - name: Download macOS ARM Binary
         uses: actions/download-artifact@v4
         with:
@@ -236,7 +227,6 @@ jobs:
 
       - name: Calculate Hashes
         run: |
-          echo "MAC_INTEL=$(sha256sum artifacts/codemeter-macos-amd64 | awk '{print $1}')" >> $GITHUB_ENV
           echo "MAC_ARM=$(sha256sum artifacts/codemeter-macos-arm64 | awk '{print $1}')" >> $GITHUB_ENV
           echo "LINUX_INTEL=$(sha256sum artifacts/codemeter-linux-amd64 | awk '{print $1}')" >> $GITHUB_ENV
           echo "LINUX_ARM=$(sha256sum artifacts/codemeter-linux-arm64 | awk '{print $1}')" >> $GITHUB_ENV
@@ -255,7 +245,6 @@ jobs:
           python3 -c "
           import os
           v = os.environ['VERSION']
-          mi = os.environ['MAC_INTEL']
           ma = os.environ['MAC_ARM']
           li = os.environ['LINUX_INTEL']
           la = os.environ['LINUX_ARM']
@@ -266,13 +255,8 @@ jobs:
             version \"{v}\"
 
             on_macos do
-              if Hardware::CPU.intel?
-                url \"https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v{v}/codemeter-macos-amd64\"
-                sha256 \"{mi}\"
-              else
-                url \"https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v{v}/codemeter-macos-arm64\"
-                sha256 \"{ma}\"
-              end
+              url \"https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v{v}/codemeter-macos-arm64\"
+              sha256 \"{ma}\"
             end
 
             on_linux do
@@ -286,9 +270,7 @@ jobs:
             end
 
             def install
-              if OS.mac? && Hardware::CPU.intel?
-                bin.install \"codemeter-macos-amd64\" => \"codemeter\"
-              elsif OS.mac? && Hardware::CPU.arm?
+              if OS.mac?
                 bin.install \"codemeter-macos-arm64\" => \"codemeter\"
               elsif OS.linux? && Hardware::CPU.intel?
                 bin.install \"codemeter-linux-amd64\" => \"codemeter\"
@@ -301,7 +283,7 @@ jobs:
               system \"#{{bin}}/codemeter\", \"--version\"
             end
           end
-          '''.format(v=v, mi=mi, ma=ma, li=li, la=la, bin='{bin}')
+          '''.format(v=v, ma=ma, li=li, la=la, bin='{bin}')
           with open('homebrew-tap/Formula/codemeter.rb', 'w') as f:
               f.write(formula)
           "
