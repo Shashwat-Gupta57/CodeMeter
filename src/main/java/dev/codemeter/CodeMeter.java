@@ -16,6 +16,10 @@ public final class CodeMeter {
     public static final String TAGLINE = "Measure your code. Physically.";
 
     public static void main(String[] args) {
+        // Force headless mode to prevent AWT from trying to load native UI libraries
+        // This is crucial for GraalVM Native Image on Windows to avoid UnsatisfiedLinkError
+        System.setProperty("java.awt.headless", "true");
+
         int exitCode = new CommandLine(new CodeMeterCommand())
                 .setCaseInsensitiveEnumValuesAllowed(true)
                 .execute(args);

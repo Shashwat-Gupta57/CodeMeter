@@ -30,6 +30,7 @@ dependencies {
     implementation("com.googlecode.lanterna:lanterna:3.0.3")
     implementation("net.java.dev.jna:jna:5.14.0")
     implementation("net.java.dev.jna:jna-platform:5.14.0")
+    compileOnly("org.graalvm.nativeimage:svm:23.1.2") // For GraalVM substitutions
 
     // JSON processing
     implementation("com.google.code.gson:gson:2.11.0")
