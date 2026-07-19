@@ -13,14 +13,12 @@ import java.util.List;
 
 public class ScanPresenter {
 
-    private static final String FULL_BLOCK = "████████████████████████████████████████████████";
-    private static final String HALF_BLOCK = "████████████████████████████████";
-    private static final String LINE = "────────────────────────────────────────────────";
+    private static final String FULL_BLOCK = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━";
 
     public static void printHeader(String path) {
         System.out.println(Ansi.AUTO.string("@|bold,cyan " + FULL_BLOCK + "|@"));
         System.out.println();
-        System.out.println(Ansi.AUTO.string("                @|bold,cyan CODEMETER|@"));
+        System.out.println(Ansi.AUTO.string("                @|bold,cyan CodeMeter|@"));
         System.out.println();
         System.out.println(Ansi.AUTO.string("        @|faint Measure your code. Physically.|@"));
         System.out.println();
@@ -40,7 +38,7 @@ public class ScanPresenter {
     public static void printProgressComplete() {
         int width = 33;
         String bar = "█".repeat(width);
-        System.out.println(Ansi.AUTO.string("\r@|cyan " + bar + "|@ @|bold 100%|@"));
+        System.out.print(Ansi.AUTO.string("\r@|cyan " + bar + "|@ @|bold 100%|@\n"));
     }
 
     public static void printResults(ScanResult result, Settings settings, long durationMs, List<Achievement> unlockedAchievements, Theme theme) {
@@ -60,83 +58,43 @@ public class ScanPresenter {
     }
 
     private static void printStory(ScanResult result, Settings settings, long durationMs, List<Achievement> unlockedAchievements) {
-        System.out.println(Ansi.AUTO.string("@|faint Completed in " + (durationMs / 1000.0) + " seconds|@"));
+        PhysicalMetrics pm = PhysicalCalculator.calculate(result, settings);
+        
         System.out.println();
-        System.out.println(Ansi.AUTO.string("@|faint " + LINE + "|@"));
+        System.out.println(Ansi.AUTO.string("@|faint Completed in " + (durationMs / 1000.0) + " seconds.|@"));
         System.out.println();
+        
+        // SECTION 2: THE HEADLINE
+        System.out.println(Ansi.AUTO.string("@|bold,cyan " + FULL_BLOCK + "|@"));
+        System.out.println();
+        
+        if (pm.characterLengthKm() >= 1.0) {
+            System.out.println(Ansi.AUTO.string("Your code stretches"));
+            System.out.println(Ansi.AUTO.string("@|bold,yellow " + String.format("%.1f kilometres|@", pm.characterLengthKm())));
+        } else if (pm.totalPages() > 1000) {
+            System.out.println(Ansi.AUTO.string("Your project fills"));
+            System.out.println(Ansi.AUTO.string("@|bold,yellow " + PhysicalCalculator.formatNumber(pm.totalPages()) + " pages|@"));
+        } else if (pm.estimatedWeightKg() > 10.0) {
+            System.out.println(Ansi.AUTO.string("Your printed code weighs"));
+            System.out.println(Ansi.AUTO.string("@|bold,yellow " + String.format("%.1f kilograms|@", pm.estimatedWeightKg())));
+        } else {
+            System.out.println(Ansi.AUTO.string("Your codebase contains"));
+            System.out.println(Ansi.AUTO.string("@|bold,yellow " + PhysicalCalculator.formatNumber(result.totalCodeLines()) + " lines of code|@"));
+        }
+        System.out.println();
+        System.out.println(Ansi.AUTO.string("@|bold,cyan " + FULL_BLOCK + "|@"));
+        System.out.println();
+
+        // SECTION 3: YOUR PROJECT
         System.out.println(Ansi.AUTO.string("You just scanned"));
-        System.out.println(Ansi.AUTO.string("@|bold,cyan " + HALF_BLOCK + "|@"));
+        System.out.println();
         System.out.println(Ansi.AUTO.string("@|bold " + result.projectName() + "|@"));
-        System.out.println(Ansi.AUTO.string("@|bold,cyan " + HALF_BLOCK + "|@"));
         System.out.println();
-        System.out.println(Ansi.AUTO.string("@|bold,yellow " + PhysicalCalculator.formatNumber(result.totalCodeLines()) + "|@"));
-        System.out.println(Ansi.AUTO.string("@|faint LINES OF CODE|@"));
-        System.out.println();
+        System.out.println(Ansi.AUTO.string(PhysicalCalculator.formatNumber(result.totalCodeLines()) + " lines"));
         System.out.println(Ansi.AUTO.string(PhysicalCalculator.formatNumber(result.totalFiles()) + " files"));
         System.out.println(Ansi.AUTO.string(result.languageCount() + " languages"));
         System.out.println();
         
-        System.out.println(Ansi.AUTO.string("@|faint " + LINE + "|@"));
-        System.out.println();
-
-        // Paper Stack & Weight
-        PhysicalMetrics pm = PhysicalCalculator.calculate(result, settings);
-        System.out.println(Ansi.AUTO.string("If printed"));
-        System.out.println(Ansi.AUTO.string("@|bold " + PhysicalCalculator.formatNumber(pm.totalPages()) + " pages|@"));
-        System.out.println(Ansi.AUTO.string("@|magenta " + HALF_BLOCK + "|@"));
-        System.out.println();
-        System.out.println(Ansi.AUTO.string("Stack height"));
-        System.out.println(Ansi.AUTO.string("@|bold " + String.format("%.1f cm", pm.verticalStackMeters() * 100) + "|@"));
-        System.out.println(Ansi.AUTO.string("@|faint " + DynamicComparisons.getBestHeightComparison(pm) + "|@"));
-        System.out.println();
-        System.out.println(Ansi.AUTO.string("Weight"));
-        System.out.println(Ansi.AUTO.string("@|bold " + String.format("%.1f kg", pm.estimatedWeightKg()) + "|@"));
-        System.out.println(Ansi.AUTO.string("@|faint " + DynamicComparisons.getBestWeightComparison(pm) + "|@"));
-        System.out.println();
-        System.out.println(Ansi.AUTO.string("Shelf width"));
-        System.out.println(Ansi.AUTO.string("@|bold " + String.format("%.1f cm", pm.shelfWidthMeters() * 100) + "|@"));
-        System.out.println(Ansi.AUTO.string("@|faint " + DynamicComparisons.getBestShelfComparison(pm) + "|@"));
-        System.out.println();
-        
-        System.out.println(Ansi.AUTO.string("@|faint " + LINE + "|@"));
-        System.out.println();
-
-        // Distance & Characters
-        System.out.println(Ansi.AUTO.string("Characters"));
-        System.out.println(Ansi.AUTO.string("@|bold " + PhysicalCalculator.formatNumber(result.totalCharacters()) + "|@"));
-        System.out.println();
-        System.out.println(Ansi.AUTO.string("If every character touched the next"));
-        if (pm.characterLengthKm() >= 1.0) {
-            System.out.println(Ansi.AUTO.string("@|bold " + String.format("%.1f km", pm.characterLengthKm()) + "|@"));
-        } else {
-            System.out.println(Ansi.AUTO.string("@|bold " + String.format("%.1f m", pm.characterLengthKm() * 1000) + "|@"));
-        }
-        System.out.println(Ansi.AUTO.string("@|faint ═══════════════════════════════|@"));
-        System.out.println(Ansi.AUTO.string("Equivalent to"));
-        for (String comp : DynamicComparisons.getBestDistanceComparisons(pm)) {
-            System.out.println(Ansi.AUTO.string("@|bold,green " + comp + "|@"));
-        }
-        System.out.println();
-        
-        System.out.println(Ansi.AUTO.string("@|faint " + LINE + "|@"));
-        System.out.println();
-        
-        // Typing / Reading
-        System.out.println(Ansi.AUTO.string("Time"));
-        System.out.println();
-        System.out.println(Ansi.AUTO.string("Typing"));
-        System.out.println(Ansi.AUTO.string("@|faint 60 WPM|@"));
-        System.out.println(Ansi.AUTO.string("@|bold " + HumanEffortCalculator.formatTimeExact(result, true) + "|@"));
-        System.out.println(Ansi.AUTO.string("@|faint " + HumanEffortCalculator.calculateTypingTime(result) + "|@"));
-        System.out.println();
-        System.out.println(Ansi.AUTO.string("Reading"));
-        System.out.println(Ansi.AUTO.string("@|bold " + HumanEffortCalculator.formatTimeExact(result, false) + "|@"));
-        System.out.println();
-        
-        System.out.println(Ansi.AUTO.string("@|faint " + LINE + "|@"));
-        System.out.println();
-
-        // Languages
         List<LanguageStats> topLangs = result.languages().stream()
                 .sorted((a, b) -> Long.compare(b.codeLines(), a.codeLines()))
                 .toList();
@@ -144,6 +102,7 @@ public class ScanPresenter {
         if (!topLangs.isEmpty()) {
             LanguageStats lang = topLangs.get(0);
             System.out.println(Ansi.AUTO.string("Largest language"));
+            System.out.println();
             System.out.println(Ansi.AUTO.string("@|bold " + lang.language() + "|@"));
             double pct = lang.percentageOf(result.totalCodeLines());
             System.out.println(Ansi.AUTO.string("@|faint " + String.format("%.1f%%", pct) + "|@"));
@@ -152,25 +111,57 @@ public class ScanPresenter {
             String bar = "█".repeat(barWidth);
             System.out.println(Ansi.AUTO.string("@|blue " + bar + "|@"));
             System.out.println();
-            System.out.println(Ansi.AUTO.string("@|faint " + LINE + "|@"));
-            System.out.println();
         }
+        System.out.println(Ansi.AUTO.string("@|faint " + FULL_BLOCK + "|@"));
+        System.out.println();
 
-        // Fun Fact
+        // SECTION 4: IF PRINTED
+        System.out.println(Ansi.AUTO.string("Printing your project would require"));
+        System.out.println(Ansi.AUTO.string("@|bold " + PhysicalCalculator.formatNumber(pm.totalPages()) + " sheets of paper.|@"));
+        System.out.println();
+        System.out.println(Ansi.AUTO.string("Those pages would form a stack"));
+        System.out.println(Ansi.AUTO.string("@|bold " + String.format("%.1f centimetres tall,|@", pm.verticalStackMeters() * 100)));
+        System.out.println(Ansi.AUTO.string("@|faint " + DynamicComparisons.getBestHeightComparison(pm) + "|@"));
+        System.out.println();
+        System.out.println(Ansi.AUTO.string("The printed code would weigh"));
+        System.out.println(Ansi.AUTO.string("@|bold " + String.format("%.1f kilograms,|@", pm.estimatedWeightKg())));
+        System.out.println(Ansi.AUTO.string("@|faint " + DynamicComparisons.getBestWeightComparison(pm) + "|@"));
+        System.out.println();
+        System.out.println(Ansi.AUTO.string("@|faint " + FULL_BLOCK + "|@"));
+        System.out.println();
+
+        // SECTION 5: IF LAID END TO END
+        System.out.println(Ansi.AUTO.string("Every character placed beside the next"));
+        System.out.println(Ansi.AUTO.string("would stretch"));
+        if (pm.characterLengthKm() >= 1.0) {
+            System.out.println(Ansi.AUTO.string("@|bold " + String.format("%.1f kilometres.|@", pm.characterLengthKm())));
+        } else {
+            System.out.println(Ansi.AUTO.string("@|bold " + String.format("%.1f metres.|@", pm.characterLengthKm() * 1000)));
+        }
+        System.out.println();
+        System.out.println(Ansi.AUTO.string("Equivalent to"));
+        for (String comp : DynamicComparisons.getBestDistanceComparisons(pm)) {
+            System.out.println(Ansi.AUTO.string("@|bold,green " + comp + "|@"));
+        }
+        System.out.println();
+        System.out.println(Ansi.AUTO.string("@|faint " + FULL_BLOCK + "|@"));
+        System.out.println();
+
+        // SECTION 6: TIME
+        System.out.println(Ansi.AUTO.string("Reading"));
+        System.out.println(Ansi.AUTO.string("@|bold " + HumanEffortCalculator.formatTimeExact(result, false) + "|@"));
+        System.out.println();
+        System.out.println(Ansi.AUTO.string("Typing"));
+        System.out.println(Ansi.AUTO.string("@|bold " + HumanEffortCalculator.formatTimeExact(result, true) + "|@"));
+        System.out.println();
+        System.out.println(Ansi.AUTO.string("@|faint (Assuming a typing speed of 60 WPM)|@"));
+        System.out.println();
+        System.out.println(Ansi.AUTO.string("@|faint " + FULL_BLOCK + "|@"));
+        System.out.println();
+
+        // SECTION 7: FUN FACT
         System.out.println(Ansi.AUTO.string("Fun fact"));
-        System.out.println(Ansi.AUTO.string("Your project is now larger than"));
-        System.out.println(Ansi.AUTO.string("@|bold " + Benchmarks.getClosestBenchmark(result) + "|@"));
-        System.out.println(Ansi.AUTO.string("@|faint (Approximate)|@"));
-        System.out.println();
-        
-        System.out.println(Ansi.AUTO.string("@|faint " + LINE + "|@"));
-        System.out.println();
-        
-        // Footer
-        System.out.println(Ansi.AUTO.string("@|faint Generated by CodeMeter|@"));
-        System.out.println(Ansi.AUTO.string("@|faint Powered by SCC|@"));
-        System.out.println(Ansi.AUTO.string("@|faint " + (durationMs / 1000.0) + " seconds|@"));
-        System.out.println(Ansi.AUTO.string("@|cyan " + FULL_BLOCK + "|@"));
+        System.out.println(Ansi.AUTO.string("Your project is now larger than @|bold " + Benchmarks.getClosestBenchmark(result) + "|@."));
         System.out.println();
     }
 
@@ -179,13 +170,13 @@ public class ScanPresenter {
         System.out.println();
         System.out.println(Ansi.AUTO.string("@|bold,cyan CODEMETER|@"));
         System.out.println(Ansi.AUTO.string(result.projectName() + " • " + PhysicalCalculator.formatNumber(result.totalCodeLines()) + " lines • " + result.totalFiles() + " files"));
-        System.out.println(Ansi.AUTO.string("@|faint " + LINE + "|@"));
+        System.out.println(Ansi.AUTO.string("@|faint " + FULL_BLOCK + "|@"));
         System.out.println(Ansi.AUTO.string("@|bold Stack:|@ " + String.format("%.1f cm", pm.verticalStackMeters() * 100) + " (" + DynamicComparisons.getBestHeightComparison(pm).replace("≈ ", "") + ")"));
         System.out.println(Ansi.AUTO.string("@|bold Weight:|@ " + String.format("%.1f kg", pm.estimatedWeightKg()) + " (" + DynamicComparisons.getBestWeightComparison(pm).replace("≈ ", "") + ")"));
         
         String lengthStr = pm.characterLengthKm() >= 1.0 ? String.format("%.1f km", pm.characterLengthKm()) : String.format("%.1f m", pm.characterLengthKm() * 1000);
         System.out.println(Ansi.AUTO.string("@|bold Length:|@ " + lengthStr + " (" + DynamicComparisons.getBestDistanceComparisons(pm).get(0).replace("✓ ", "") + ")"));
-        System.out.println(Ansi.AUTO.string("@|faint " + LINE + "|@"));
+        System.out.println(Ansi.AUTO.string("@|faint " + FULL_BLOCK + "|@"));
     }
 
     private static void printMinimal(ScanResult result, Settings settings, long durationMs) {
@@ -202,14 +193,24 @@ public class ScanPresenter {
 
     public static void printAchievements(List<Achievement> unlockedAchievements) {
         if (unlockedAchievements != null && !unlockedAchievements.isEmpty()) {
+            System.out.println(Ansi.AUTO.string("@|faint " + FULL_BLOCK + "|@"));
+            System.out.println();
             for (Achievement ach : unlockedAchievements) {
                 System.out.println(Ansi.AUTO.string("Achievement unlocked"));
-                System.out.println(Ansi.AUTO.string("@|bold,yellow " + ach.icon() + " " + ach.displayName() + "|@"));
-                System.out.println(Ansi.AUTO.string("@|faint " + ach.description() + "|@"));
                 System.out.println();
-                System.out.println(Ansi.AUTO.string("@|faint " + LINE + "|@"));
+                System.out.println(Ansi.AUTO.string("@|bold,yellow " + ach.icon() + " " + ach.displayName() + "|@"));
+                System.out.println(Ansi.AUTO.string(ach.description()));
                 System.out.println();
             }
         }
+    }
+
+    public static void printFooter(long durationMs) {
+        System.out.println(Ansi.AUTO.string("@|faint " + FULL_BLOCK + "|@"));
+        System.out.println();
+        System.out.println(Ansi.AUTO.string("@|faint Story generated by CodeMeter|@"));
+        System.out.println(Ansi.AUTO.string("@|faint Powered by SCC|@"));
+        System.out.println(Ansi.AUTO.string("@|faint Generated in " + (durationMs / 1000.0) + " seconds.|@"));
+        System.out.println();
     }
 }

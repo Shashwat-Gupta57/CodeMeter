@@ -62,6 +62,8 @@ public class ScanCommand implements Runnable {
             if (theme == Theme.story || theme == Theme.wrapped) {
                 ScanPresenter.printAchievements(unlocked);
             }
+            
+            ScanPresenter.printFooter(duration);
 
         } catch (ScanException e) {
             System.err.println("❌ Scan failed: " + e.getMessage());

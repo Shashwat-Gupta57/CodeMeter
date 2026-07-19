@@ -1,13 +1,13 @@
 package dev.codemeter.cli;
 
 import dev.codemeter.CodeMeter;
-import dev.codemeter.shell.ShellApp;
+
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
 /**
  * Main CLI command for CodeMeter.
- * When invoked without subcommands, launches the interactive Shell.
+ * When invoked without subcommands, it prints the help menu.
  */
 @Command(
         name = "codemeter",
@@ -21,11 +21,11 @@ import picocli.CommandLine.Command;
         }
 )
 public class CodeMeterCommand implements Runnable {
+    @picocli.CommandLine.Spec
+    picocli.CommandLine.Model.CommandSpec spec;
 
     @Override
     public void run() {
-        // Default action: launch the Shell
-        ShellApp app = new ShellApp();
-        app.run();
+        spec.commandLine().usage(System.out);
     }
 }

@@ -11,23 +11,23 @@ public class DynamicComparisons {
         double cm = pm.verticalStackMeters() * 100;
         
         if (pm.mountEverests() >= 1.0) {
-            return "≈ " + String.format("%.1f", pm.mountEverests()) + " Mount Everests";
+            return String.format("roughly the height of %.1f Mount Everests.", pm.mountEverests());
         } else if (pm.burjKhalifas() >= 1.0) {
-            return "≈ " + String.format("%.1f", pm.burjKhalifas()) + " Burj Khalifas";
+            return String.format("about the height of %.1f Burj Khalifas.", pm.burjKhalifas());
         } else if (pm.eiffelTowers() >= 1.0) {
-            return "≈ " + String.format("%.1f", pm.eiffelTowers()) + " Eiffel Towers";
-        } else if (cm > 200) { // 2 meters
-            return "≈ " + String.format("%.1f", pm.verticalStackMeters() / 3.0) + " stories high";
+            return String.format("taller than %.1f Eiffel Towers.", pm.eiffelTowers());
+        } else if (cm > 300) { 
+            return String.format("about %.1f stories high.", pm.verticalStackMeters() / 3.0);
         } else if (cm > 100) {
-            return "≈ Dining table";
+            return "about the height of a dining table.";
         } else if (cm > 30) {
-            return "≈ Desktop monitor";
+            return "about the height of a desktop monitor.";
         } else if (cm > 15) {
-            return "≈ Paperback novel";
+            return "roughly the height of a paperback novel.";
         } else if (cm > 5) {
-            return "≈ Coffee mug";
+            return "roughly the height of a coffee mug.";
         } else {
-            return "≈ Matchbox";
+            return "about the height of a matchbox.";
         }
     }
 
@@ -35,37 +35,23 @@ public class DynamicComparisons {
         double kg = pm.estimatedWeightKg();
         
         if (kg > 5000) {
-            return "≈ " + String.format("%.1f", kg / 4000.0) + " African Elephants";
+            return String.format("weighing as much as %.1f African Elephants.", kg / 4000.0);
         } else if (kg > 1500) {
-            return "≈ Family car";
+            return "about the weight of a family car.";
         } else if (kg > 300) {
-            return "≈ Grand piano";
+            return "about the weight of a grand piano.";
         } else if (kg > 70) {
-            return "≈ Adult human";
+            return "about the weight of an adult human.";
         } else if (kg > 20) {
-            return "≈ Golden Retriever";
+            return "about the weight of a Golden Retriever.";
         } else if (kg > 3.0) {
-            return "≈ Gaming laptop";
+            return "about the weight of a gaming laptop.";
         } else if (kg > 1.0) {
-            return "≈ Hardcover book";
+            return "about the weight of a hardcover book.";
         } else if (kg > 0.2) {
-            return "≈ Smartphone";
+            return "about the weight of a smartphone.";
         } else {
-            return "≈ A few letters";
-        }
-    }
-
-    public static String getBestShelfComparison(PhysicalMetrics pm) {
-        double cm = pm.shelfWidthMeters() * 100;
-        
-        if (pm.bookshelves() >= 1.0) {
-            return String.format("Fills %.1f full bookshelves", pm.bookshelves());
-        } else if (cm > 30) {
-            return "Fits comfortably on one bookshelf";
-        } else if (cm > 5) {
-            return "Takes up a corner of a desk";
-        } else {
-            return "Barely noticeable on a shelf";
+            return "weighing about as much as a few letters.";
         }
     }
 
@@ -77,15 +63,14 @@ public class DynamicComparisons {
             comps.add(String.format("✓ %.1f Marathons", pm.marathons()));
         } else if (pm.marathons() >= 1.0) {
             comps.add(String.format("✓ %.1f Marathons", pm.marathons()));
-            comps.add(String.format("✓ %.1f Eiffel Towers", pm.eiffelTowers()));
             comps.add(String.format("✓ %.0f football fields", pm.footballFields()));
         } else if (pm.footballFields() >= 1.0) {
             comps.add(String.format("✓ %.0f football fields", pm.footballFields()));
             comps.add(String.format("✓ Around Central Park %.1f times", pm.centralParkLoops()));
-            comps.add(String.format("✓ %.1f Marathons", pm.marathons()));
-            comps.add(String.format("✓ %.1f Eiffel Towers", pm.eiffelTowers()));
-        } else {
+        } else if (pm.olympicSwimmingPools() >= 1.0) {
             comps.add(String.format("✓ %.1f Olympic swimming pools", pm.olympicSwimmingPools()));
+            comps.add(String.format("✓ %.1f Basketball courts", pm.basketballCourts()));
+        } else {
             comps.add(String.format("✓ %.1f Basketball courts", pm.basketballCourts()));
             comps.add(String.format("✓ %.1f Tennis courts", pm.tennisCourts()));
         }
