@@ -12,7 +12,7 @@ import picocli.CommandLine;
 public final class CodeMeter {
 
     public static final String NAME = "CodeMeter";
-    public static final String VERSION = "2.5.0";
+    public static final String VERSION = "2.5.1";
     public static final String TAGLINE = "Measure your code. Physically.";
 
     public static void main(String[] args) {

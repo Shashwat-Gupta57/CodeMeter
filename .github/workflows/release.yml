@@ -193,6 +193,11 @@ jobs:
               }
             }' > scoop-bucket/bucket/codemeter.json
 
+      - name: Validate Manifest
+        run: |
+          cd scoop-bucket
+          jq . bucket/codemeter.json > /dev/null
+
       - name: Push to Bucket
         run: |
           cd scoop-bucket
@@ -301,6 +306,11 @@ jobs:
               f.write(formula)
           "
 
+      - name: Audit Formula
+        run: |
+          cd homebrew-tap
+          brew audit --strict --online Formula/codemeter.rb || echo "Warning: brew audit failed, but we will proceed (since the tap might be empty initially and cause warnings)."
+
       - name: Push to Tap
         run: |
           cd homebrew-tap
@@ -308,3 +318,23 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
           git diff --cached --quiet && echo "No changes" || (git commit -m "Update CodeMeter to v${{ env.VERSION }}" && git push)
+
+  verify-distribution:
+    needs: [publish-winget, publish-scoop, publish-homebrew]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Scoop Distribution
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          MANIFEST=$(curl -sL https://raw.githubusercontent.com/Shashwat-Gupta57/scoop-bucket/main/bucket/codemeter.json)
+          echo "$MANIFEST" | jq -e ".version == \"$VERSION\"" || (echo "Scoop version mismatch" && exit 1)
+          echo "$MANIFEST" | jq -e ".architecture.\"64bit\".url | contains(\"$VERSION\")" || (echo "Scoop URL mismatch" && exit 1)
+          echo "Scoop manifest successfully verified!"
+
+      - name: Verify Homebrew Distribution
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          FORMULA=$(curl -sL https://raw.githubusercontent.com/Shashwat-Gupta57/homebrew-tap/main/Formula/codemeter.rb)
+          echo "$FORMULA" | grep -q "version \"$VERSION\"" || (echo "Homebrew version mismatch" && exit 1)
+          echo "$FORMULA" | grep -q "codemeter-macos-amd64" || (echo "Homebrew URL mismatch" && exit 1)
+          echo "Homebrew formula successfully verified!"
