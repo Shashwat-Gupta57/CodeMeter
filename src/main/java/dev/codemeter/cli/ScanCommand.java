@@ -10,6 +10,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * Headless scan command for CI/automation usage.
@@ -26,17 +27,16 @@ public class ScanCommand implements Runnable {
     @Override
     public void run() {
         try {
-            System.out.println("⚡ CodeMeter — Scanning " + path.toAbsolutePath() + "...");
-            System.out.println();
+            ScanPresenter.printHeader(path.toAbsolutePath().toString());
 
+            long start = System.currentTimeMillis();
             CodeScanner scanner = ScannerFactory.create();
-            System.out.println("  Using scanner: " + scanner.name());
 
             ScanResult result = scanner.scan(path, progress -> {
-                System.out.print("\r  Progress: " + progress + "%");
+                ScanPresenter.printProgress(progress);
             });
-            System.out.println("\r  Progress: 100% ✓");
-            System.out.println();
+            ScanPresenter.printProgressComplete();
+            long duration = System.currentTimeMillis() - start;
 
             // Save to storage
             StorageManager storage = new StorageManager();
@@ -44,58 +44,15 @@ public class ScanCommand implements Runnable {
             storage.addOrUpdateProject(Project.from(result));
             storage.addHistoryEntry(HistoryEntry.from(result));
             storage.addRecentPath(result.projectPath());
-            storage.checkAndUpdateAchievements(result);
+            List<Achievement> unlocked = storage.checkAndUpdateAchievements(result);
             storage.save();
 
             // Display results
-            printResults(result, storage.getSettings());
+            ScanPresenter.printResults(result, storage.getSettings(), duration, unlocked);
 
         } catch (ScanException e) {
             System.err.println("❌ Scan failed: " + e.getMessage());
             System.exit(1);
         }
-    }
-
-    private void printResults(ScanResult result, Settings settings) {
-        System.out.println("╔══════════════════════════════════════════════════════╗");
-        System.out.println("║                    CODE OVERVIEW                     ║");
-        System.out.println("╠══════════════════════════════════════════════════════╣");
-        System.out.printf("║  Project:     %-38s ║%n", result.projectName());
-        System.out.printf("║  Files:       %-38s ║%n", PhysicalCalculator.formatNumber(result.totalFiles()));
-        System.out.printf("║  Languages:   %-38s ║%n", result.languageCount());
-        System.out.printf("║  Code:        %-38s ║%n", PhysicalCalculator.formatNumber(result.totalCodeLines()));
-        System.out.printf("║  Comments:    %-38s ║%n", PhysicalCalculator.formatNumber(result.totalCommentLines()));
-        System.out.printf("║  Blank:       %-38s ║%n", PhysicalCalculator.formatNumber(result.totalBlankLines()));
-        System.out.printf("║  Characters:  %-38s ║%n", PhysicalCalculator.formatNumber(result.totalCharacters()));
-        System.out.printf("║  Bytes:       %-38s ║%n", PhysicalCalculator.formatNumber(result.totalBytes()));
-        System.out.println("╠══════════════════════════════════════════════════════╣");
-        System.out.println("║                  PHYSICAL METRICS                    ║");
-        System.out.println("╠══════════════════════════════════════════════════════╣");
-
-        PhysicalMetrics pm = PhysicalCalculator.calculate(result, settings);
-        System.out.printf("║  Character Length:  %-32s ║%n", PhysicalCalculator.formatMetric(pm.characterLengthKm(), "km"));
-        System.out.printf("║  Stack Height:      %-32s ║%n", PhysicalCalculator.formatMetric(pm.verticalStackMeters(), "m"));
-        System.out.printf("║  Football Fields:   %-32s ║%n", PhysicalCalculator.formatMetric(pm.footballFields(), ""));
-        System.out.printf("║  Burj Khalifas:     %-32s ║%n", PhysicalCalculator.formatMetric(pm.burjKhalifas(), ""));
-        System.out.printf("║  Pages:             %-32s ║%n", PhysicalCalculator.formatNumber(pm.totalPages()));
-        System.out.printf("║  Trees Required:    %-32s ║%n", PhysicalCalculator.formatMetric(pm.treesRequired(), ""));
-        System.out.printf("║  Weight:            %-32s ║%n", PhysicalCalculator.formatMetric(pm.estimatedWeightKg(), "kg"));
-        System.out.println("╚══════════════════════════════════════════════════════╝");
-        System.out.println();
-
-        // Language breakdown
-        System.out.println("  Languages:");
-        for (LanguageStats lang : result.languages().stream()
-                .sorted((a, b) -> Long.compare(b.codeLines(), a.codeLines()))
-                .limit(10)
-                .toList()) {
-            double pct = lang.percentageOf(result.totalCodeLines());
-            String bar = "█".repeat((int) (pct / 5));
-            System.out.printf("    %-20s %6s lines  %5.1f%%  %s%n",
-                    lang.language(),
-                    PhysicalCalculator.formatNumber(lang.codeLines()),
-                    pct, bar);
-        }
-        System.out.println();
     }
 }
