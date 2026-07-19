@@ -23,6 +23,9 @@ public final class CodeMeter {
         } catch (java.io.UnsupportedEncodingException e) {
             // Should never happen, UTF-8 is guaranteed by JVM
         }
+        
+        // Force Windows Console to actually decode the UTF-8 bytes we send it
+        dev.codemeter.cli.WindowsConsoleSetup.enableUTF8();
         // Force headless mode to prevent AWT from trying to load native UI libraries
         // This is crucial for GraalVM Native Image on Windows to avoid UnsatisfiedLinkError
         System.setProperty("java.awt.headless", "true");
