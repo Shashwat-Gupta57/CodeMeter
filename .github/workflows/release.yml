@@ -9,7 +9,27 @@ jobs:
   build-native:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            arch: amd64
+            target: codemeter-linux-amd64
+            artifact: codemeter
+          - os: ubuntu-24.04-arm
+            arch: arm64
+            target: codemeter-linux-arm64
+            artifact: codemeter
+          - os: macos-13
+            arch: amd64
+            target: codemeter-macos-amd64
+            artifact: codemeter
+          - os: macos-14
+            arch: arm64
+            target: codemeter-macos-arm64
+            artifact: codemeter
+          - os: windows-latest
+            arch: amd64
+            target: codemeter-windows-amd64.exe
+            artifact: codemeter.exe
     runs-on: ${{ matrix.os }}
     
     steps:
@@ -28,13 +48,20 @@ jobs:
       - name: Build Native Image
         run: ./gradlew nativeCompile
 
+      - name: Rename Binary
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            mv build/native/nativeCompile/codemeter.exe build/native/nativeCompile/${{ matrix.target }}
+          else
+            mv build/native/nativeCompile/codemeter build/native/nativeCompile/${{ matrix.target }}
+          fi
+        shell: bash
+
       - name: Upload Native Binary
         uses: actions/upload-artifact@v4
         with:
-          name: codemeter-native-${{ matrix.os }}
-          path: |
-            build/native/nativeCompile/codemeter
-            build/native/nativeCompile/codemeter.exe
+          name: native-${{ matrix.target }}
+          path: build/native/nativeCompile/${{ matrix.target }}
 
   build-jar:
     runs-on: ubuntu-latest
@@ -54,11 +81,24 @@ jobs:
       - name: Build Shadow JAR
         run: ./gradlew shadowJar
 
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: spdx-json
+          output-file: codemeter-sbom.json
+
       - name: Upload JAR
         uses: actions/upload-artifact@v4
         with:
           name: codemeter-jar
           path: build/libs/codemeter.jar
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: codemeter-sbom.json
 
   release:
     needs: [build-native, build-jar]
@@ -74,26 +114,219 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+          merge-multiple: true
 
       - name: Prepare Release Assets
         run: |
           mkdir -p release-assets
-          cp artifacts/codemeter-jar/codemeter.jar release-assets/
+          cp artifacts/codemeter.jar release-assets/
+          cp artifacts/codemeter-linux-amd64 release-assets/ || true
+          cp artifacts/codemeter-linux-arm64 release-assets/ || true
+          cp artifacts/codemeter-macos-amd64 release-assets/ || true
+          cp artifacts/codemeter-macos-arm64 release-assets/ || true
+          cp artifacts/codemeter-windows-amd64.exe release-assets/ || true
+          cp artifacts/codemeter-sbom.json release-assets/ || true
           
-          if [ -f artifacts/codemeter-native-ubuntu-latest/codemeter ]; then
-            cp artifacts/codemeter-native-ubuntu-latest/codemeter release-assets/codemeter-linux-amd64
-          fi
-          
-          if [ -f artifacts/codemeter-native-macos-latest/codemeter ]; then
-            cp artifacts/codemeter-native-macos-latest/codemeter release-assets/codemeter-macos-amd64
-          fi
-          
-          if [ -f artifacts/codemeter-native-windows-latest/codemeter.exe ]; then
-            cp artifacts/codemeter-native-windows-latest/codemeter.exe release-assets/codemeter-windows-amd64.exe
-          fi
+          cd release-assets
+          sha256sum * > SHA256SUMS
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: release-assets/*
           generate_release_notes: true
+
+  publish-winget:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: vedantmgoyal2009/winget-releaser@v2
+        with:
+          identifier: ShashwatGupta.CodeMeter
+          installers-regex: '\.exe$'
+          token: ${{ secrets.PAT_TOKEN }}
+
+  publish-scoop:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Calculate Hash
+        id: hash
+        run: |
+          echo "WIN_HASH=$(sha256sum artifacts/codemeter-windows-amd64.exe | awk '{print $1}')" >> $GITHUB_ENV
+          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Checkout Scoop Bucket
+        uses: actions/checkout@v4
+        with:
+          repository: Shashwat-Gupta57/scoop-bucket
+          token: ${{ secrets.PAT_TOKEN }}
+          path: scoop-bucket
+
+      - name: Update Manifest
+        run: |
+          mkdir -p scoop-bucket/bucket
+          cat << 'EOF' > scoop-bucket/bucket/codemeter.json
+          {
+            "version": "${{ env.VERSION }}",
+            "description": "Measure your code. Physically.",
+            "homepage": "https://github.com/Shashwat-Gupta57/CodeMeter",
+            "license": "MIT",
+            "architecture": {
+              "64bit": {
+                "url": "https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v${{ env.VERSION }}/codemeter-windows-amd64.exe#/codemeter.exe",
+                "hash": "${{ env.WIN_HASH }}"
+              }
+            },
+            "bin": "codemeter.exe",
+            "checkver": "github",
+            "autoupdate": {
+              "architecture": {
+                "64bit": {
+                  "url": "https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v$version/codemeter-windows-amd64.exe#/codemeter.exe"
+                }
+              }
+            }
+          }
+          EOF
+
+      - name: Push to Bucket
+        run: |
+          cd scoop-bucket
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add bucket/codemeter.json
+          git commit -m "Update CodeMeter to v${{ env.VERSION }}"
+          git push
+
+  publish-homebrew:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Calculate Hashes
+        id: hashes
+        run: |
+          echo "MAC_INTEL=$(sha256sum artifacts/codemeter-macos-amd64 | awk '{print $1}')" >> $GITHUB_ENV
+          echo "MAC_ARM=$(sha256sum artifacts/codemeter-macos-arm64 | awk '{print $1}')" >> $GITHUB_ENV
+          echo "LINUX_INTEL=$(sha256sum artifacts/codemeter-linux-amd64 | awk '{print $1}')" >> $GITHUB_ENV
+          echo "LINUX_ARM=$(sha256sum artifacts/codemeter-linux-arm64 | awk '{print $1}')" >> $GITHUB_ENV
+          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Checkout Homebrew Tap
+        uses: actions/checkout@v4
+        with:
+          repository: Shashwat-Gupta57/homebrew-tap
+          token: ${{ secrets.PAT_TOKEN }}
+          path: homebrew-tap
+
+      - name: Update Formula
+        run: |
+          mkdir -p homebrew-tap/Formula
+          cat << 'EOF' > homebrew-tap/Formula/codemeter.rb
+          class Codemeter < Formula
+            desc "Measure your code. Physically."
+            homepage "https://github.com/Shashwat-Gupta57/CodeMeter"
+            version "${{ env.VERSION }}"
+            license "MIT"
+
+            on_macos do
+              if Hardware::CPU.intel?
+                url "https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v${{ env.VERSION }}/codemeter-macos-amd64"
+                sha256 "${{ env.MAC_INTEL }}"
+              else
+                url "https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v${{ env.VERSION }}/codemeter-macos-arm64"
+                sha256 "${{ env.MAC_ARM }}"
+              end
+            end
+
+            on_linux do
+              if Hardware::CPU.intel?
+                url "https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v${{ env.VERSION }}/codemeter-linux-amd64"
+                sha256 "${{ env.LINUX_INTEL }}"
+              else
+                url "https://github.com/Shashwat-Gupta57/CodeMeter/releases/download/v${{ env.VERSION }}/codemeter-linux-arm64"
+                sha256 "${{ env.LINUX_ARM }}"
+              end
+            end
+
+            def install
+              if OS.mac? && Hardware::CPU.intel?
+                bin.install "codemeter-macos-amd64" => "codemeter"
+              elsif OS.mac? && Hardware::CPU.arm?
+                bin.install "codemeter-macos-arm64" => "codemeter"
+              elsif OS.linux? && Hardware::CPU.intel?
+                bin.install "codemeter-linux-amd64" => "codemeter"
+              elsif OS.linux? && Hardware::CPU.arm?
+                bin.install "codemeter-linux-arm64" => "codemeter"
+              end
+            end
+
+            test do
+              system "#{bin}/codemeter", "--version"
+            end
+          end
+          EOF
+
+      - name: Push to Tap
+        run: |
+          cd homebrew-tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/codemeter.rb
+          git commit -m "Update CodeMeter to v${{ env.VERSION }}"
+          git push
+
+  update-nix-flake:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Calculate Hashes
+        id: hashes
+        run: |
+          echo "MAC_INTEL=sha256-$(openssl dgst -sha256 -binary artifacts/codemeter-macos-amd64 | openssl base64 -A)" >> $GITHUB_ENV
+          echo "MAC_ARM=sha256-$(openssl dgst -sha256 -binary artifacts/codemeter-macos-arm64 | openssl base64 -A)" >> $GITHUB_ENV
+          echo "LINUX_INTEL=sha256-$(openssl dgst -sha256 -binary artifacts/codemeter-linux-amd64 | openssl base64 -A)" >> $GITHUB_ENV
+          echo "LINUX_ARM=sha256-$(openssl dgst -sha256 -binary artifacts/codemeter-linux-arm64 | openssl base64 -A)" >> $GITHUB_ENV
+          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Update flake.nix
+        run: |
+          sed -i "s/version = \".*\"/version = \"${{ env.VERSION }}\"/" flake.nix
+          sed -i "s|x86_64-linux = \".*\"|x86_64-linux = \"${{ env.LINUX_INTEL }}\"|" flake.nix
+          sed -i "s|aarch64-linux = \".*\"|aarch64-linux = \"${{ env.LINUX_ARM }}\"|" flake.nix
+          sed -i "s|x86_64-darwin = \".*\"|x86_64-darwin = \"${{ env.MAC_INTEL }}\"|" flake.nix
+          sed -i "s|aarch64-darwin = \".*\"|aarch64-darwin = \"${{ env.MAC_ARM }}\"|" flake.nix
+
+      - name: Push to Repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add flake.nix
+          git commit -m "chore: Update Nix flake hashes for v${{ env.VERSION }}"
+          git push
