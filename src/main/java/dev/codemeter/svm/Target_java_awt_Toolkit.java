@@ -9,4 +9,9 @@ public final class Target_java_awt_Toolkit {
     public static void loadLibraries() {
         // Do nothing to avoid UnsatisfiedLinkError on Windows Native Image
     }
+
+    @Substitute
+    private static void initIDs() {
+        // Do nothing to avoid calling native method
+    }
 }
