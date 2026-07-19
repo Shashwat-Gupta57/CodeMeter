@@ -11,8 +11,13 @@ import java.util.stream.Collectors;
 
 public class WrappedPresenter {
 
-    private static final String FULL_BLOCK = "==============================================";
-    private static final String LINE = "----------------------------------------------";
+    private static String getFullBlock() {
+        return TerminalCapabilities.supportsUnicode() ? "████████████████████████████████████████████████" : "==============================================";
+    }
+    
+    private static String getLine() {
+        return TerminalCapabilities.supportsUnicode() ? "────────────────────────────────────────────────" : "----------------------------------------------";
+    }
 
     public static void printWrapped(List<HistoryEntry> history, List<Achievement> achievements) {
         if (history == null || history.isEmpty()) {
@@ -20,11 +25,11 @@ public class WrappedPresenter {
             return;
         }
 
-        System.out.println(Ansi.AUTO.string("@|bold,magenta " + FULL_BLOCK + "|@"));
+        System.out.println(Ansi.AUTO.string("@|bold,magenta " + getFullBlock() + "|@"));
         System.out.println();
         System.out.println(Ansi.AUTO.string("           @|bold,magenta YOUR YEAR IN CODE|@"));
         System.out.println();
-        System.out.println(Ansi.AUTO.string("@|bold,magenta " + FULL_BLOCK + "|@"));
+        System.out.println(Ansi.AUTO.string("@|bold,magenta " + getFullBlock() + "|@"));
         System.out.println();
 
         // Total scanned
@@ -41,7 +46,7 @@ public class WrappedPresenter {
         System.out.println(Ansi.AUTO.string("across all your scans."));
         System.out.println();
 
-        System.out.println(Ansi.AUTO.string("@|faint " + LINE + "|@"));
+        System.out.println(Ansi.AUTO.string("@|faint " + getLine() + "|@"));
         System.out.println();
 
         // Largest repository
@@ -51,7 +56,7 @@ public class WrappedPresenter {
             System.out.println(Ansi.AUTO.string("@|bold,cyan " + largest.get().projectName() + "|@"));
             System.out.println(Ansi.AUTO.string("weighing in at " + PhysicalCalculator.formatNumber(largest.get().totalCodeLines()) + " lines."));
             System.out.println();
-            System.out.println(Ansi.AUTO.string("@|faint " + LINE + "|@"));
+            System.out.println(Ansi.AUTO.string("@|faint " + getLine() + "|@"));
             System.out.println();
         }
 
@@ -71,13 +76,13 @@ public class WrappedPresenter {
             if (achievements.size() > 3) {
                 System.out.println(Ansi.AUTO.string("@|faint ...and " + (achievements.size() - 3) + " more.|@"));
             }
-            System.out.println(Ansi.AUTO.string("@|faint " + LINE + "|@"));
+            System.out.println(Ansi.AUTO.string("@|faint " + getLine() + "|@"));
             System.out.println();
         }
 
         System.out.println(Ansi.AUTO.string("@|bold,magenta CodeMeter Wrapped|@"));
         System.out.println(Ansi.AUTO.string("@|faint Share your scale.|@"));
-        System.out.println(Ansi.AUTO.string("@|magenta " + FULL_BLOCK + "|@"));
+        System.out.println(Ansi.AUTO.string("@|magenta " + getFullBlock() + "|@"));
         System.out.println();
     }
 }

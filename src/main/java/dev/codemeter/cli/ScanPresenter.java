@@ -13,16 +13,18 @@ import java.util.List;
 
 public class ScanPresenter {
 
-    private static final String FULL_BLOCK = "==============================================";
+    private static String getFullBlock() {
+        return TerminalCapabilities.supportsUnicode() ? "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" : "==============================================";
+    }
 
     public static void printHeader(String path) {
-        System.out.println(Ansi.AUTO.string("@|bold,cyan " + FULL_BLOCK + "|@"));
+        System.out.println(Ansi.AUTO.string("@|bold,cyan " + getFullBlock() + "|@"));
         System.out.println();
         System.out.println(Ansi.AUTO.string("                @|bold,cyan CodeMeter|@"));
         System.out.println();
         System.out.println(Ansi.AUTO.string("        @|faint Measure your code. Physically.|@"));
         System.out.println();
-        System.out.println(Ansi.AUTO.string("@|bold,cyan " + FULL_BLOCK + "|@"));
+        System.out.println(Ansi.AUTO.string("@|bold,cyan " + getFullBlock() + "|@"));
         System.out.println();
         System.out.println(Ansi.AUTO.string("@|faint Scanning|@"));
         System.out.println(Ansi.AUTO.string("@|bold " + path + "|@"));
@@ -31,13 +33,16 @@ public class ScanPresenter {
     public static void printProgress(int percent) {
         int width = 33;
         int filled = (percent * width) / 100;
-        String bar = "#".repeat(filled) + "-".repeat(width - filled);
+        char fillChar = TerminalCapabilities.supportsUnicode() ? '█' : '#';
+        char emptyChar = TerminalCapabilities.supportsUnicode() ? '░' : '-';
+        String bar = String.valueOf(fillChar).repeat(filled) + String.valueOf(emptyChar).repeat(width - filled);
         System.out.print(Ansi.AUTO.string("\r@|cyan " + bar + "|@ @|bold " + percent + "%|@"));
     }
 
     public static void printProgressComplete() {
         int width = 33;
-        String bar = "#".repeat(width);
+        char fillChar = TerminalCapabilities.supportsUnicode() ? '█' : '#';
+        String bar = String.valueOf(fillChar).repeat(width);
         System.out.print(Ansi.AUTO.string("\r@|cyan " + bar + "|@ @|bold 100%|@\n"));
     }
 
@@ -65,7 +70,7 @@ public class ScanPresenter {
         System.out.println();
         
         // SECTION 2: THE HEADLINE
-        System.out.println(Ansi.AUTO.string("@|bold,cyan " + FULL_BLOCK + "|@"));
+        System.out.println(Ansi.AUTO.string("@|bold,cyan " + getFullBlock() + "|@"));
         System.out.println();
         
         if (pm.characterLengthKm() >= 1.0) {
@@ -82,7 +87,7 @@ public class ScanPresenter {
             System.out.println(Ansi.AUTO.string("@|bold,yellow " + PhysicalCalculator.formatNumber(result.totalCodeLines()) + " lines of code|@"));
         }
         System.out.println();
-        System.out.println(Ansi.AUTO.string("@|bold,cyan " + FULL_BLOCK + "|@"));
+        System.out.println(Ansi.AUTO.string("@|bold,cyan " + getFullBlock() + "|@"));
         System.out.println();
 
         // SECTION 3: YOUR PROJECT
@@ -108,11 +113,12 @@ public class ScanPresenter {
             System.out.println(Ansi.AUTO.string("@|faint " + String.format("%.1f%%", pct) + "|@"));
             
             int barWidth = Math.min((int) (pct / 2.5), 23); // 23 max length for 100%
-            String bar = "#".repeat(barWidth);
+            char fillChar = TerminalCapabilities.supportsUnicode() ? '█' : '#';
+            String bar = String.valueOf(fillChar).repeat(barWidth);
             System.out.println(Ansi.AUTO.string("@|blue " + bar + "|@"));
             System.out.println();
         }
-        System.out.println(Ansi.AUTO.string("@|faint " + FULL_BLOCK + "|@"));
+        System.out.println(Ansi.AUTO.string("@|faint " + getFullBlock() + "|@"));
         System.out.println();
 
         // SECTION 4: IF PRINTED
@@ -127,7 +133,7 @@ public class ScanPresenter {
         System.out.println(Ansi.AUTO.string("@|bold " + String.format("%.1f kilograms,|@", pm.estimatedWeightKg())));
         System.out.println(Ansi.AUTO.string("@|faint " + DynamicComparisons.getBestWeightComparison(pm) + "|@"));
         System.out.println();
-        System.out.println(Ansi.AUTO.string("@|faint " + FULL_BLOCK + "|@"));
+        System.out.println(Ansi.AUTO.string("@|faint " + getFullBlock() + "|@"));
         System.out.println();
 
         // SECTION 5: IF LAID END TO END
@@ -143,8 +149,7 @@ public class ScanPresenter {
         for (String comp : DynamicComparisons.getBestDistanceComparisons(pm)) {
             System.out.println(Ansi.AUTO.string("@|bold,green " + comp + "|@"));
         }
-        System.out.println();
-        System.out.println(Ansi.AUTO.string("@|faint " + FULL_BLOCK + "|@"));
+        System.out.println(Ansi.AUTO.string("@|faint " + getFullBlock() + "|@"));
         System.out.println();
 
         // SECTION 6: TIME
@@ -155,8 +160,7 @@ public class ScanPresenter {
         System.out.println(Ansi.AUTO.string("@|bold " + HumanEffortCalculator.formatTimeExact(result, true) + "|@"));
         System.out.println();
         System.out.println(Ansi.AUTO.string("@|faint (Assuming a typing speed of 60 WPM)|@"));
-        System.out.println();
-        System.out.println(Ansi.AUTO.string("@|faint " + FULL_BLOCK + "|@"));
+        System.out.println(Ansi.AUTO.string("@|faint " + getFullBlock() + "|@"));
         System.out.println();
 
         // SECTION 7: FUN FACT
@@ -170,13 +174,13 @@ public class ScanPresenter {
         System.out.println();
         System.out.println(Ansi.AUTO.string("@|bold,cyan CODEMETER|@"));
         System.out.println(Ansi.AUTO.string(result.projectName() + " • " + PhysicalCalculator.formatNumber(result.totalCodeLines()) + " lines • " + result.totalFiles() + " files"));
-        System.out.println(Ansi.AUTO.string("@|faint " + FULL_BLOCK + "|@"));
+        System.out.println(Ansi.AUTO.string("@|faint " + getFullBlock() + "|@"));
         System.out.println(Ansi.AUTO.string("@|bold Stack:|@ " + String.format("%.1f cm", pm.verticalStackMeters() * 100) + " (" + DynamicComparisons.getBestHeightComparison(pm).replace("≈ ", "") + ")"));
         System.out.println(Ansi.AUTO.string("@|bold Weight:|@ " + String.format("%.1f kg", pm.estimatedWeightKg()) + " (" + DynamicComparisons.getBestWeightComparison(pm).replace("≈ ", "") + ")"));
         
         String lengthStr = pm.characterLengthKm() >= 1.0 ? String.format("%.1f km", pm.characterLengthKm()) : String.format("%.1f m", pm.characterLengthKm() * 1000);
         System.out.println(Ansi.AUTO.string("@|bold Length:|@ " + lengthStr + " (" + DynamicComparisons.getBestDistanceComparisons(pm).get(0).replace("✓ ", "") + ")"));
-        System.out.println(Ansi.AUTO.string("@|faint " + FULL_BLOCK + "|@"));
+        System.out.println(Ansi.AUTO.string("@|faint " + getFullBlock() + "|@"));
     }
 
     private static void printMinimal(ScanResult result, Settings settings, long durationMs) {
@@ -193,7 +197,7 @@ public class ScanPresenter {
 
     public static void printAchievements(List<Achievement> unlockedAchievements) {
         if (unlockedAchievements != null && !unlockedAchievements.isEmpty()) {
-            System.out.println(Ansi.AUTO.string("@|faint " + FULL_BLOCK + "|@"));
+            System.out.println(Ansi.AUTO.string("@|faint " + getFullBlock() + "|@"));
             System.out.println();
             for (Achievement ach : unlockedAchievements) {
                 System.out.println(Ansi.AUTO.string("Achievement unlocked"));
@@ -206,7 +210,7 @@ public class ScanPresenter {
     }
 
     public static void printFooter(long durationMs) {
-        System.out.println(Ansi.AUTO.string("@|faint " + FULL_BLOCK + "|@"));
+        System.out.println(Ansi.AUTO.string("@|faint " + getFullBlock() + "|@"));
         System.out.println();
         System.out.println(Ansi.AUTO.string("@|faint Story generated by CodeMeter|@"));
         System.out.println(Ansi.AUTO.string("@|faint Powered by SCC|@"));
