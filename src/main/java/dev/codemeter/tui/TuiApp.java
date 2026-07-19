@@ -109,6 +109,8 @@ public class TuiApp {
     private void initTerminal() throws IOException {
         DefaultTerminalFactory factory = new DefaultTerminalFactory();
         factory.setTerminalEmulatorTitle("CodeMeter — Measure your code. Physically.");
+        factory.setPreferTerminalEmulator(false);
+        factory.setForceTextTerminal(true);
         terminal = factory.createTerminal();
         screen = new TerminalScreen(terminal);
         screen.startScreen();

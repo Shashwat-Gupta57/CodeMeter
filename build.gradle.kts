@@ -3,6 +3,7 @@ plugins {
     application
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.graalvm.buildtools.native") version "0.10.2"
+    id("org.cyclonedx.bom") version "1.8.2"
 }
 
 group = "dev.codemeter"
@@ -27,6 +28,8 @@ dependencies {
 
     // Terminal UI
     implementation("com.googlecode.lanterna:lanterna:3.1.2")
+    implementation("net.java.dev.jna:jna:5.14.0")
+    implementation("net.java.dev.jna:jna-platform:5.14.0")
 
     // JSON processing
     implementation("com.google.code.gson:gson:2.11.0")
@@ -73,6 +76,18 @@ tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJ
     archiveClassifier.set("")
     archiveVersion.set("")
     mergeServiceFiles()
+}
+
+graalvmNative {
+    binaries {
+        named("main") {
+            imageName.set("codemeter")
+            fallback.set(false)
+        }
+    }
+    metadataRepository {
+        enabled.set(true)
+    }
 }
 
 tasks.withType<JavaCompile> {
