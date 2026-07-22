@@ -220,7 +220,9 @@ public class SccScanner implements CodeScanner {
                         try {
                             String content = Files.readString(file);
                             charCount[0] += content.length();
-                            wordCount[0] += content.split("\\s+").length;
+                            if (!content.isBlank()) {
+                                wordCount[0] += content.split("\\s+").length;
+                            }
                             String[] lines = content.split("\n", -1);
                             for (String line : lines) {
                                 totalLineLength[0] += line.length();

@@ -1,8 +1,6 @@
 package dev.codemeter.cli;
 
 import dev.codemeter.CodeMeter;
-import dev.codemeter.core.model.Settings;
-import dev.codemeter.core.scanner.SccScanner;
 import dev.codemeter.core.storage.StorageManager;
 import picocli.CommandLine.Command;
 
@@ -29,11 +27,11 @@ public class DoctorCommand implements Callable<Integer> {
         }
 
         // Scanner checks
-        SccScanner scanner = new SccScanner();
-        if (scanner.isAvailable()) {
-            System.out.println("✓ SCC detected");
+        String scannerName = dev.codemeter.core.scanner.ScannerFactory.availableScannerName();
+        if (!scannerName.equals("none")) {
+            System.out.println("✓ Scanner detected: " + scannerName);
         } else {
-            System.out.println("! SCC not found (requires manual installation)");
+            System.out.println("✗ No code scanner found (install scc or cloc)");
             allGood = false;
         }
 

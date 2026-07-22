@@ -70,6 +70,10 @@ public class ClocScanner implements CodeScanner {
                 throw new ScanException("cloc timed out after 5 minutes");
             }
 
+            if (process.exitValue() != 0) {
+                throw new ScanException("cloc exited with code " + process.exitValue() + ": " + output);
+            }
+
             if (progressCallback != null) progressCallback.accept(70);
 
             ScanResult result = parseClocCsvOutput(output.toString(), directory);
@@ -183,6 +187,10 @@ public class ClocScanner implements CodeScanner {
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
                     String dirName = dir.getFileName() != null ? dir.getFileName().toString() : "";
+                    if (dir.equals(directory)) {
+                        dirCount[0]++;
+                        return FileVisitResult.CONTINUE;
+                    }
                     if (dirName.startsWith(".") || dirName.equals("node_modules")
                             || dirName.equals("vendor") || dirName.equals("target")
                             || dirName.equals("build") || dirName.equals("dist")) {
@@ -211,11 +219,13 @@ public class ClocScanner implements CodeScanner {
                         largestFile[0] = directory.relativize(file).toString();
                     }
 
-                    if (size < 1_048_576) {
+                    if (size < 1_048_576 && isTextFile(fileName)) {
                         try {
                             String content = Files.readString(file);
                             charCount[0] += content.length();
-                            wordCount[0] += content.split("\\s+").length;
+                            if (!content.isBlank()) {
+                                wordCount[0] += content.split("\\s+").length;
+                            }
                             String[] lines = content.split("\n", -1);
                             for (String line : lines) {
                                 totalLineLength[0] += line.length();
@@ -260,5 +270,24 @@ public class ClocScanner implements CodeScanner {
         } catch (IOException e) {
             return result;
         }
+    }
+
+    private boolean isTextFile(String fileName) {
+        String lower = fileName.toLowerCase();
+        return lower.endsWith(".java") || lower.endsWith(".py") || lower.endsWith(".js")
+                || lower.endsWith(".ts") || lower.endsWith(".tsx") || lower.endsWith(".jsx")
+                || lower.endsWith(".c") || lower.endsWith(".cpp") || lower.endsWith(".h")
+                || lower.endsWith(".cs") || lower.endsWith(".go") || lower.endsWith(".rs")
+                || lower.endsWith(".rb") || lower.endsWith(".php") || lower.endsWith(".swift")
+                || lower.endsWith(".kt") || lower.endsWith(".scala") || lower.endsWith(".r")
+                || lower.endsWith(".sql") || lower.endsWith(".sh") || lower.endsWith(".bash")
+                || lower.endsWith(".html") || lower.endsWith(".css") || lower.endsWith(".xml")
+                || lower.endsWith(".json") || lower.endsWith(".yaml") || lower.endsWith(".yml")
+                || lower.endsWith(".md") || lower.endsWith(".txt") || lower.endsWith(".toml")
+                || lower.endsWith(".cfg") || lower.endsWith(".ini") || lower.endsWith(".properties")
+                || lower.endsWith(".gradle") || lower.endsWith(".kts") || lower.endsWith(".vue")
+                || lower.endsWith(".svelte") || lower.endsWith(".dart") || lower.endsWith(".lua")
+                || lower.endsWith(".ex") || lower.endsWith(".exs") || lower.endsWith(".erl")
+                || lower.endsWith(".hs") || lower.endsWith(".ml") || lower.endsWith(".clj");
     }
 }

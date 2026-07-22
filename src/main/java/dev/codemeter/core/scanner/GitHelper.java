@@ -4,7 +4,6 @@ import dev.codemeter.core.model.GitStats;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -14,13 +13,19 @@ import java.util.concurrent.TimeUnit;
 public class GitHelper {
 
     public static GitStats getGitStats(Path directory) {
-        if (!Files.exists(directory.resolve(".git"))) {
+        // Use git rev-parse to detect git repos (works for subdirectories too)
+        try {
+            String isGit = runGitCommand(directory, "git", "rev-parse", "--is-inside-work-tree");
+            if (isGit == null || !isGit.trim().equals("true")) {
+                return null;
+            }
+        } catch (Exception e) {
             return null;
         }
 
         try {
-            // Get first commit date
-            String firstCommit = runGitCommand(directory, "git", "log", "--reverse", "--format=%cd", "--date=short");
+            // Get first commit date (limit output to avoid loading entire history)
+            String firstCommit = runGitCommand(directory, "git", "log", "--reverse", "--format=%cd", "--date=short", "--max-count=1");
             if (firstCommit == null || firstCommit.isEmpty()) return null;
             firstCommit = firstCommit.split("\n")[0].trim();
 

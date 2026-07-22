@@ -20,7 +20,7 @@ import java.util.List;
         name = "scan",
         description = "Scan a directory and display results (headless mode)"
 )
-public class ScanCommand implements Runnable {
+public class ScanCommand implements java.util.concurrent.Callable<Integer> {
 
     @Parameters(index = "0", description = "Path to scan", defaultValue = ".")
     private Path path;
@@ -33,8 +33,17 @@ public class ScanCommand implements Runnable {
     }
 
     @Override
-    public void run() {
+    public Integer call() {
         try {
+            if (!java.nio.file.Files.exists(path)) {
+                System.err.println("❌ Path does not exist: " + path.toAbsolutePath());
+                return 1;
+            }
+            if (!java.nio.file.Files.isDirectory(path)) {
+                System.err.println("❌ Not a directory: " + path.toAbsolutePath());
+                return 1;
+            }
+
             ScanPresenter.printHeader(path.toAbsolutePath().toString());
 
             long start = System.currentTimeMillis();
@@ -65,9 +74,10 @@ public class ScanCommand implements Runnable {
             
             ScanPresenter.printFooter(duration);
 
+            return 0;
         } catch (ScanException e) {
             System.err.println("❌ Scan failed: " + e.getMessage());
-            System.exit(1);
+            return 1;
         }
     }
 }

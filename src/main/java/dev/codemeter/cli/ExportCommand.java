@@ -18,7 +18,7 @@ import java.nio.file.Path;
         name = "export",
         description = "Export scan results to various formats (JSON, CSV, Markdown, PDF)"
 )
-public class ExportCommand implements Runnable {
+public class ExportCommand implements java.util.concurrent.Callable<Integer> {
 
     @Parameters(index = "0", description = "Path to scan", defaultValue = ".")
     private Path scanPath;
@@ -31,7 +31,7 @@ public class ExportCommand implements Runnable {
     private Path outputPath;
 
     @Override
-    public void run() {
+    public Integer call() {
         try {
             System.out.println("⚡ Scanning " + scanPath.toAbsolutePath() + "...");
             CodeScanner scanner = ScannerFactory.create();
@@ -46,13 +46,14 @@ public class ExportCommand implements Runnable {
             exportService.export(result, format, output);
 
             System.out.println("✓ Exported to " + output.toAbsolutePath());
+            return 0;
 
         } catch (ScanException e) {
             System.err.println("❌ Scan failed: " + e.getMessage());
-            System.exit(1);
+            return 1;
         } catch (Exception e) {
             System.err.println("❌ Export failed: " + e.getMessage());
-            System.exit(1);
+            return 1;
         }
     }
 }

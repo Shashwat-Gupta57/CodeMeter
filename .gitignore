@@ -33,6 +33,9 @@ desktop.ini
 # Scratch / debug artifacts
 scratch/
 install-test/
+CharsetTest.*
+DefaultTerminalFactory.*
+check_imports.*
 
 # Generated reports
 codemeter-report.*

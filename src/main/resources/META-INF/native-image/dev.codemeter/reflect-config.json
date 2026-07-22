@@ -6,6 +6,12 @@
     "allDeclaredMethods": true
   },
   {
+    "name": "dev.codemeter.core.model.GitStats",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true
+  },
+  {
     "name": "dev.codemeter.core.model.ScanResult",
     "allDeclaredConstructors": true,
     "allDeclaredFields": true,
